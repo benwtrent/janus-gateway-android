@@ -14,6 +14,11 @@ public class JanusCreateSessionTransaction implements ITransactionCallbacks {
         this.callbacks = callbacks;
     }
 
+    public TransactionType getTransactionType()
+    {
+        return TransactionType.create;
+    }
+
     @Override
     public void reportSuccess(JSONObject obj)
     {

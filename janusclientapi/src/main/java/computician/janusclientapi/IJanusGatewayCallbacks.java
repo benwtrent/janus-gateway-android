@@ -1,5 +1,7 @@
 package computician.janusclientapi;
 
+import org.webrtc.PeerConnection;
+
 import java.util.List;
 
 /**
@@ -9,7 +11,7 @@ public interface IJanusGatewayCallbacks extends IJanusCallbacks {
     public void onSuccess();
     public void onDestroy();
     public String getServerUri();
-    public List<JanusIceServer> getIceServers();
+    public List<PeerConnection.IceServer> getIceServers();
     public Boolean getIpv6Support();
     public Integer getMaxPollEvents();
 }

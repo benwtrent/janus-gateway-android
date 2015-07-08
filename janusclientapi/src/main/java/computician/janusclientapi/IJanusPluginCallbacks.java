@@ -8,6 +8,7 @@ import org.webrtc.SessionDescription;
 public interface IJanusPluginCallbacks {
     void success(JanusPluginHandle handle);
     void error(JSONObject errorMsg);
+    void error(String errorMsg);
     void consentDialog(boolean on);
     void onMessage(JSONObject msg, JSONObject jsep);
     void onLocalStream(MediaStream stream);

@@ -7,11 +7,16 @@ import org.json.JSONObject;
  * Created by ben.trent on 6/25/2015.
  */
 public class JanusSendPluginMessageTransaction implements ITransactionCallbacks {
-    private final IJanusSendPluginMessageCallbacks callbacks;
+    private final IPluginHandleSendMessageCallbacks callbacks;
 
-    public JanusSendPluginMessageTransaction(IJanusSendPluginMessageCallbacks callbacks)
+    public JanusSendPluginMessageTransaction(JanusSupportedPluginPackages plugin, IPluginHandleSendMessageCallbacks callbacks)
     {
         this.callbacks = callbacks;
+    }
+
+    public TransactionType getTransactionType()
+    {
+        return TransactionType.plugin_handle_message;
     }
 
     public void reportSuccess(JSONObject obj)
@@ -32,13 +37,13 @@ public class JanusSendPluginMessageTransaction implements ITransactionCallbacks 
                     }
                     else
                     {
-                        callbacks.onJanusPluginMessageSynchronousSuccess(plugin, data);
+                        callbacks.onSuccessSynchronous(data);
                     }
                     break;
                 }
                 case ack:
                 {
-                    callbacks.onJanusPluginMessageAsynchronousAck();
+                    callbacks.onSuccesAsynchronous();
                     break;
                 }
                 default:

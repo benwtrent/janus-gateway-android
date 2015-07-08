@@ -9,10 +9,18 @@ import org.json.JSONObject;
 public class JanusAttachPluginTransaction implements ITransactionCallbacks {
 
     private final IJanusAttachPluginCallbacks callbacks;
-
-    public JanusAttachPluginTransaction(IJanusAttachPluginCallbacks callbacks)
+    private final JanusSupportedPluginPackages plugin;
+    private final IJanusPluginCallbacks pluginCallbacks;
+    public JanusAttachPluginTransaction(IJanusAttachPluginCallbacks callbacks, JanusSupportedPluginPackages plugin, IJanusPluginCallbacks pluginCallbacks)
     {
         this.callbacks = callbacks;
+        this.plugin = plugin;
+        this.pluginCallbacks = pluginCallbacks;
+    }
+
+    public TransactionType getTransactionType()
+    {
+        return TransactionType.attach;
     }
 
     @Override
@@ -27,7 +35,7 @@ public class JanusAttachPluginTransaction implements ITransactionCallbacks {
             }
             else
             {
-                callbacks.attachPluginSuccess(obj);
+                callbacks.attachPluginSuccess(obj, plugin, pluginCallbacks);
             }
         }
         catch(JSONException ex)
