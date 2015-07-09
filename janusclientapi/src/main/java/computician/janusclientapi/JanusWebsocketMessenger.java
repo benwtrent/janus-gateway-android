@@ -1,5 +1,6 @@
 package computician.janusclientapi;
 
+import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -73,6 +74,18 @@ public class JanusWebsocketMessenger extends WebSocketClient implements IJanusMe
     @Override
     public void sendMessage(String message) {
         super.send(message);
+    }
+
+    @Override
+    public void sendMessage(String message, BigInteger session_id)
+    {
+        sendMessage(message);
+    }
+
+    @Override
+    public void sendMessage(String message, BigInteger session_id, BigInteger handle_id)
+    {
+        sendMessage(message);
     }
 
     @Override

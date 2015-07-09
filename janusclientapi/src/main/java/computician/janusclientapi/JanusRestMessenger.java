@@ -1,5 +1,6 @@
 package computician.janusclientapi;
 
+import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -31,6 +32,18 @@ public class JanusRestMessenger implements IJanusMessenger {
 
     @Override
     public void sendMessage(String message) {
+        //todo
+    }
+
+    @Override
+    public void sendMessage(String message, BigInteger session_id)
+    {
+        //todo
+    }
+
+    @Override
+    public void sendMessage(String message, BigInteger session_id, BigInteger handle_id)
+    {
         //todo
     }
 

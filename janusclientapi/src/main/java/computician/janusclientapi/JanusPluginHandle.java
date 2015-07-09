@@ -171,7 +171,15 @@ public class JanusPluginHandle {
 
     public void onMessage(String msg)
     {
+        try
+        {
+            JSONObject obj = new JSONObject(msg);
+            callbacks.onMessage(obj, null);
+        }
+        catch(JSONException ex)
+        {
 
+        }
     }
 
     public void onMessage(JSONObject msg, JSONObject jsep)
@@ -356,7 +364,7 @@ public class JanusPluginHandle {
         {
             if(pc == null)
             {
-                callbacks.error("No peerconnection created, if this is an answer please use createAnswer");
+                callbacks.onCallbackError("No peerconnection created, if this is an answer please use createAnswer");
                 return;
             }
             try
@@ -375,12 +383,34 @@ public class JanusPluginHandle {
 
     public void hangUp()
     {
-
+        if(remoteStream != null)
+        {
+            remoteStream.dispose();
+            remoteStream = null;
+        }
+        if(myStream != null)
+        {
+            myStream.dispose();
+            myStream = null;
+        }
+        if(pc != null && pc.signalingState() != PeerConnection.SignalingState.CLOSED)
+            pc.close();
+        pc = null;
+        started = false;
+        mySdp = null;
+        if(dataChannel != null)
+            dataChannel.close();
+        dataChannel = null;
+        trickle = true;
+        iceDone = false;
+        sdpSent = false;
     }
 
     public void detach()
     {
-
+        hangUp();
+        JSONObject obj = new JSONObject();
+        server.sendMessage(obj, JanusMessageType.detach, id);
     }
 
     public void onLocalSdp(SessionDescription sdp, IPluginHandleWebRTCCallbacks callbacks)
