@@ -65,13 +65,16 @@ public class JanusMediaConstraints {
         }
     }
 
-    public class JanusAudio {
-        public JanusAudio() {}
+    public enum Camera{
+        front,
+        back
     }
 
-    private JanusAudio audio = null;
-
+    private Boolean sendAudio = false;
     private JanusVideo video = null;
+    private Boolean recvVideo = false;
+    private Boolean recvAudio = false;
+    private Camera camera = Camera.front;
 
     public JanusMediaConstraints() { }
 
@@ -79,16 +82,27 @@ public class JanusMediaConstraints {
         return video;
     }
 
+    public Boolean getSendVideo() {
+        return video != null;
+    }
+
     public void setVideo(JanusVideo video) {
         this.video = video;
     }
 
-    public JanusAudio getAudio() {
-        return audio;
+    public Boolean getSendAudio() {
+        return sendAudio;
     }
 
-    public void setAudio(JanusAudio audio) {
-        this.audio = audio;
+    public void setSendAudio(Boolean sendAudio) {
+        this.sendAudio = sendAudio;
     }
+
+    public void setRecvVideo(Boolean recvVideo) { this.recvVideo = recvVideo;}
+    public Boolean getRecvVideo() { return recvVideo;}
+    public void setRecvAudio(Boolean recvAudio) { this.recvAudio = recvAudio;}
+    public Boolean getRecvAudio() { return recvAudio; }
+    public Camera getCamera() { return camera;}
+    public void setCamera(Camera camera) { this.camera = camera;}
 
 }

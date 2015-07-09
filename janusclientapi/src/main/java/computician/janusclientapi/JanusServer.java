@@ -1,5 +1,7 @@
 package computician.janusclientapi;
 
+import android.content.Context;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.webrtc.PeerConnection;
@@ -12,6 +14,8 @@ import java.net.URISyntaxException;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Random;
+
+import javax.microedition.khronos.egl.EGLContext;
 
 /**
  * Created by ben.trent on 5/7/2015.
@@ -46,6 +50,7 @@ public class JanusServer implements Runnable, IJanusServerPluginMessageInterface
     private Boolean connected;
     private final IJanusMessenger serverConnection;
     private volatile Thread keep_alive;
+    private Boolean peerConnectionFactoryInitialized = false;
     public JanusServer(IJanusGatewayCallbacks gatewayCallbacks) throws URISyntaxException {
         gatewayObserver = gatewayCallbacks;
         java.lang.System.setProperty("java.net.preferIPv6Addresses", "false");
@@ -85,6 +90,14 @@ public class JanusServer implements Runnable, IJanusServerPluginMessageInterface
         {
             onCallbackError(ex.getMessage());
         }
+    }
+
+    public boolean initializeMediaContext(Context context, boolean audio, boolean video, boolean videoHwAcceleration, EGLContext eglContext)
+    {
+        if(!PeerConnectionFactory.initializeAndroidGlobals(context, audio, video, videoHwAcceleration, eglContext))
+            return false;
+        peerConnectionFactoryInitialized = true;
+        return true;
     }
 
     public void run()
@@ -127,6 +140,11 @@ public class JanusServer implements Runnable, IJanusServerPluginMessageInterface
 
     public void Attach(IJanusPluginCallbacks callbacks)
     {
+        if(!peerConnectionFactoryInitialized)
+        {
+            callbacks.error("Peerconnection factory is not initialized, please initialize via initializeMediaContext so that peerconnections can be made by the plugins");
+            return;
+        }
         try
         {
             JSONObject obj = new JSONObject();
@@ -171,6 +189,27 @@ public class JanusServer implements Runnable, IJanusServerPluginMessageInterface
         //TODO
     }
 
+
+    public void sendMessage(JSONObject msg, JanusMessageType type, BigInteger handle)
+    {
+        try
+        {
+            msg.put("janus", type.toString());
+            if(serverConnection.getMessengerType() == JanusMessengerType.websocket) {
+                msg.put("session_id", sessionId);
+                if(BigInteger.valueOf(0).compareTo(handle) > 0)
+                    msg.put("handle_id", handle);
+            }
+            msg.put("transaction", stringGenerator.randomString(12));
+            if(connected)
+                serverConnection.sendMessage(msg.toString());
+        }
+        catch (JSONException ex)
+        {
+
+        }
+    }
+
     //region ServerPluginMessage
 
     @Override
@@ -182,7 +221,10 @@ public class JanusServer implements Runnable, IJanusServerPluginMessageInterface
             try
             {
                 JSONObject newMessage = new JSONObject();
-                newMessage.put("janus", JanusMessageType.message.toString());
+                if(type != TransactionType.trickle)
+                    newMessage.put("janus", JanusMessageType.message.toString());
+                else
+                    newMessage.put("janus", JanusMessageType.message.toString());
 
                 if(serverConnection.getMessengerType() == JanusMessengerType.websocket)
                 {
@@ -211,6 +253,7 @@ public class JanusServer implements Runnable, IJanusServerPluginMessageInterface
         try
         {
             JSONObject msg = new JSONObject();
+            msg.put("janus", JanusMessageType.message.toString());
             if(serverConnection.getMessengerType() == JanusMessengerType.websocket)
             {
                 msg.put("session_id", sessionId);
