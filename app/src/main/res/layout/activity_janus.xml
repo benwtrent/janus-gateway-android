@@ -1,0 +1,28 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:background="#0099cc"
+    tools:context="computician.janusclient.JanusActivity">
+
+    <!-- The primary full-screen view. This can be replaced with whatever view
+         is needed to present your content, e.g. VideoView, SurfaceView,
+         TextureView, etc. -->
+
+    <!-- This FrameLayout insets its children based on system windows using
+         android:fitsSystemWindows. -->
+
+    <android.opengl.GLSurfaceView
+        android:id="@+id/glview"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent" />
+    <SurfaceView
+        android:layout_width="match_parent"
+        android:layout_height="298dp"
+        android:id="@+id/surfaceView"
+        android:layout_gravity="center_horizontal|top" />
+
+    <SurfaceView
+        android:layout_width="match_parent"
+        android:layout_height="268dp"
+        android:id="@+id/surfaceView2"
+        android:layout_gravity="center_horizontal|bottom" />
+</FrameLayout>
