@@ -70,10 +70,10 @@ public class JanusMediaConstraints {
         back
     }
 
-    private Boolean sendAudio = false;
-    private JanusVideo video = null;
-    private Boolean recvVideo = false;
-    private Boolean recvAudio = false;
+    private Boolean sendAudio = true;
+    private JanusVideo video = new JanusVideo();
+    private Boolean recvVideo = true;
+    private Boolean recvAudio = true;
     private Camera camera = Camera.front;
 
     public JanusMediaConstraints() { }

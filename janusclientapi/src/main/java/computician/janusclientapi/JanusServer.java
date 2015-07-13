@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.microedition.khronos.egl.EGLContext;
+import android.opengl.EGLContext;
 
 /**
  * Created by ben.trent on 5/7/2015.
@@ -65,6 +65,8 @@ public class JanusServer implements Runnable, IJanusMessageObserver, IJanusSessi
         sessionId = new BigInteger("-1");
         serverConnection = JanusMessagerFactory.createMessager(serverUri, this);
     }
+
+
 
     private String putNewTransaction(ITransactionCallbacks transactionCallbacks)
     {
@@ -181,6 +183,11 @@ public class JanusServer implements Runnable, IJanusMessageObserver, IJanusSessi
             for(Object trans : transactions.entrySet())
                 transactions.remove(trans);
         }
+    }
+
+    public void Connect()
+    {
+        serverConnection.connect();
     }
 
     public void newMessageForPlugin(String message, BigInteger plugin_id)
