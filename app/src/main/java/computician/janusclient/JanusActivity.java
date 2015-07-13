@@ -370,6 +370,8 @@ public class JanusActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        java.lang.System.setProperty("java.net.preferIPv6Addresses", "false");
+        java.lang.System.setProperty("java.net.preferIPv4Stack", "true");
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_janus);

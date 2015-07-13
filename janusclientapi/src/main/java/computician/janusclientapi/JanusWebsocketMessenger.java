@@ -1,5 +1,7 @@
 package computician.janusclientapi;
 
+import android.util.Log;
+
 import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -7,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.java_websocket.client.WebSocketClient;
-import org.java_websocket.drafts.Draft_10;
+import org.java_websocket.drafts.Draft_17;
 import org.java_websocket.handshake.ServerHandshake;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,7 +34,7 @@ public class JanusWebsocketMessenger extends WebSocketClient implements IJanusMe
     private final IJanusMessageObserver handler;
     private final JanusMessengerType type = JanusMessengerType.websocket;
     public JanusWebsocketMessenger(String uri, Map<String, String> map, IJanusMessageObserver handler) throws URISyntaxException {
-        super(new URI(uri), new Draft_10(), map, 250);
+        super(new URI(uri), new Draft_17(), map, 250);
         this.uri = new URI(uri);
         this.handler = handler;
     }
@@ -53,6 +55,7 @@ public class JanusWebsocketMessenger extends WebSocketClient implements IJanusMe
 
     @Override
     public void onMessage(String message) {
+        Log.w("onMessage", message);
         receivedMessage(message);
     }
 
@@ -73,6 +76,7 @@ public class JanusWebsocketMessenger extends WebSocketClient implements IJanusMe
 
     @Override
     public void sendMessage(String message) {
+        Log.w("sendMessage", message);
         super.send(message);
     }
 
