@@ -6,14 +6,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.webrtc.PeerConnection;
 import org.webrtc.PeerConnectionFactory;
-import org.webrtc.SessionDescription;
-import org.webrtc.VideoRendererGui;
 
 import java.math.BigInteger;
 import java.net.URISyntaxException;
-import java.util.Hashtable;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -399,7 +395,7 @@ public class JanusServer implements Runnable, IJanusMessageObserver, IJanusSessi
     {
         try
         {
-            sessionId = (BigInteger)obj.getJSONObject("data").get("id");
+            sessionId = new BigInteger(obj.getJSONObject("data").getString("id"));
             keep_alive = new Thread(this, "KeepAlive");
             keep_alive.start();
             connected = true;
@@ -421,7 +417,7 @@ public class JanusServer implements Runnable, IJanusMessageObserver, IJanusSessi
     {
         try
         {
-            BigInteger handle = (BigInteger)obj.getJSONObject("data").get("id");
+            BigInteger handle = new BigInteger(obj.getJSONObject("data").getString("id"));
             JanusPluginHandle pluginHandle = new JanusPluginHandle(this, plugin, handle, pluginCallbacks);
             synchronized (attachedPluginsLock) {
                 attachedPlugins.put(handle, pluginHandle);
