@@ -97,7 +97,7 @@ public class JanusServer implements Runnable, IJanusMessageObserver, IJanusSessi
         Thread thisThread = Thread.currentThread();
         while (keep_alive == thisThread) {
             try {
-                thisThread.sleep(29000);
+                thisThread.sleep(25000);
             } catch (InterruptedException ex) {
             }
             if (!connected || serverConnection.getMessengerType() != JanusMessengerType.websocket)

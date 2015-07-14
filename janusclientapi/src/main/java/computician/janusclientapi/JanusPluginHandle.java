@@ -1,5 +1,7 @@
 package computician.janusclientapi;
 
+import android.util.Log;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.webrtc.*;
@@ -102,17 +104,19 @@ public class JanusPluginHandle {
                 case GATHERING:
                     break;
                 case COMPLETE:
+                    sendSdp(webRtcCallbacks);
                     break;
                 default:
                     break;
             }
+            Log.d("JANUSCLIENT", "Ice Gathering " + state.toString());
         }
 
         @Override
         public void onIceCandidate(IceCandidate candidate) {
-            if (!trickle && candidate == null) {
+            if (!trickle) {
                 sendSdp(webRtcCallbacks);
-            } else {
+            } else if(trickle){
                 sendTrickleCandidate(candidate);
             }
         }
@@ -361,7 +365,6 @@ public class JanusPluginHandle {
                 return;
             if (sdpSent)
                 return;
-
             try {
                 sdpSent = true;
                 JSONObject obj = new JSONObject();

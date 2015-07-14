@@ -11,7 +11,6 @@ import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.webrtc.MediaStream;
 import org.webrtc.PeerConnection;
@@ -20,7 +19,6 @@ import org.webrtc.VideoRendererGui;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.io.Console;
 
 public class JanusActivity extends Activity {
     private static final boolean AUTO_HIDE = true;
@@ -123,7 +121,7 @@ public class JanusActivity extends Activity {
 
                 @Override
                 public Boolean getTrickle() {
-                    return true;
+                    return false;
                 }
 
                 @Override
@@ -176,8 +174,36 @@ public class JanusActivity extends Activity {
         }
 
         @Override
-        public void onMessage(JSONObject msg, JSONObject jsep) {
+        public void onMessage(JSONObject msg, final JSONObject jsepLocal) {
+            if(jsepLocal != null)
+            {
+                handle.handleRemoteJsep(new IPluginHandleWebRTCCallbacks() {
+                    @Override
+                    public void onSuccess(JSONObject obj) {
 
+                    }
+
+                    @Override
+                    public JSONObject getJsep() {
+                        return jsepLocal;
+                    }
+
+                    @Override
+                    public JanusMediaConstraints getMedia() {
+                        return null;
+                    }
+
+                    @Override
+                    public Boolean getTrickle() {
+                        return null;
+                    }
+
+                    @Override
+                    public void onCallbackError(String error) {
+
+                    }
+                });
+            }
         }
 
         @Override

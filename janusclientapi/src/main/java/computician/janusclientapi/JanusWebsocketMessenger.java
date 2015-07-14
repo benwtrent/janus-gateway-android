@@ -50,6 +50,10 @@ public class JanusWebsocketMessenger implements IJanusMessenger {
                 client.setClosedCallback(new CompletedCallback() {
                     @Override
                     public void onCompleted(Exception ex) {
+                        Log.d("JANUSCLIENT", "Socket closed for some reason");
+                        if (ex != null) {
+                            Log.d("JANUSCLIENT", "SOCKET EX " + ex.getMessage());
+                        }
                         if (ex != null) {
                             onError(ex);
                         } else {
