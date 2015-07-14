@@ -8,9 +8,11 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.java_websocket.client.WebSocketClient;
-import org.java_websocket.drafts.Draft_17;
-import org.java_websocket.handshake.ServerHandshake;
+import com.koushikdutta.async.callback.CompletedCallback;
+import com.koushikdutta.async.http.AsyncHttpClient;
+import com.koushikdutta.async.http.WebSocket;
+import com.koushikdutta.async.http.WebSocketHandshakeException;
+import com.koushikdutta.async.http.WebSocketImpl;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -18,66 +20,72 @@ import org.json.JSONObject;
 /**
  * Created by ben.trent on 5/7/2015.
  */
-public class JanusWebsocketMessenger extends WebSocketClient implements IJanusMessenger {
+public class JanusWebsocketMessenger implements IJanusMessenger {
 
-    public static class ProtocolMap
-    {
-        public static Map<String, String> getProtocolMap(String protocol)
-        {
-            Map<String, String> map = new HashMap<>();
-            map.put("0", protocol);
-            return map;
-        }
-    }
-
-    private final URI uri;
+    private final String uri;
     private final IJanusMessageObserver handler;
     private final JanusMessengerType type = JanusMessengerType.websocket;
-    public JanusWebsocketMessenger(String uri, Map<String, String> map, IJanusMessageObserver handler) throws URISyntaxException {
-        super(new URI(uri), new Draft_17(), map, 250);
-        this.uri = new URI(uri);
+    private WebSocket client = null;
+    public JanusWebsocketMessenger(String uri, IJanusMessageObserver handler) throws URISyntaxException {
+        this.uri = uri;
         this.handler = handler;
     }
 
     @Override
     public JanusMessengerType getMessengerType() { return type; }
 
-    @Override
-    public void connect() {
-        super.connect();
+    public void connect()
+    {
+        AsyncHttpClient.getDefaultInstance().websocket(uri, "janus-protocol", new AsyncHttpClient.WebSocketConnectCallback(){
+            @Override
+            public void onCompleted(Exception ex, WebSocket webSocket) {
+                if(ex != null) {
+                    handler.onError(ex);
+                }
+                client = webSocket;
+                client.setStringCallback(new WebSocket.StringCallback() {
+                    @Override
+                    public void onStringAvailable(String s) {
+                        onMessage(s);
+                    }
+                });
+                client.setClosedCallback(new CompletedCallback() {
+                    @Override
+                    public void onCompleted(Exception ex) {
+                        if (ex != null) {
+                            onError(ex);
+                        } else {
+                            onClose(-1, "unknown", true);
+                        }
+                    }
+                });
+                handler.onOpen();
+            }
+        });
     }
 
-    @Override
-    public void onOpen(ServerHandshake handshakedata) {
-        //todo
-        handler.onOpen();
-    }
-
-    @Override
     public void onMessage(String message) {
         Log.w("onMessage", message);
         receivedMessage(message);
     }
 
-    @Override
     public void onClose(int code, String reason, boolean remote) {
         handler.onClose();
     }
 
-    @Override
     public void onError(Exception ex) {
         handler.onError(ex);
     }
 
     @Override
     public void disconnect() {
-        super.close();
+        client.close();
     }
 
     @Override
     public void sendMessage(String message) {
         Log.w("sendMessage", message);
-        super.send(message);
+        client.send(message);
     }
 
     @Override

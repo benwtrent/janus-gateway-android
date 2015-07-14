@@ -10,7 +10,7 @@ public class JanusMessagerFactory {
     {
 
         if(uri.indexOf("ws") == 0) {
-            return new JanusWebsocketMessenger(uri, new JanusWebsocketMessenger.ProtocolMap().getProtocolMap("janus-protocol"), handler);
+            return new JanusWebsocketMessenger(uri, handler);
         } else {
             return new JanusRestMessenger(uri, handler);
         }

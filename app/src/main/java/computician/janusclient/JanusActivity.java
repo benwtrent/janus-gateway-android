@@ -38,7 +38,7 @@ import java.util.ListIterator;
 
 public class JanusActivity extends Activity {
     private static final boolean AUTO_HIDE = true;
-    private final String JANUS_URI = "ws://192.168.1.197:8188/janus";
+    private final String JANUS_URI = "ws://192.168.1.197:8188";
     private JanusPluginHandle handle = null;
     private static int LOCAL_X = 0;
     private static int LOCAL_Y = 0;
