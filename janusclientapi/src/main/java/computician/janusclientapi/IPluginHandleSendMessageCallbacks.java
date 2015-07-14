@@ -7,7 +7,10 @@ import org.json.JSONObject;
  */
 public interface IPluginHandleSendMessageCallbacks extends IJanusCallbacks {
     void onSuccessSynchronous(JSONObject obj);
+
     void onSuccesAsynchronous();
+
     JSONObject getJsep();
+
     JSONObject getMessage();
 }

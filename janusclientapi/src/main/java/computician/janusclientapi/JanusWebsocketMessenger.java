@@ -3,16 +3,12 @@ package computician.janusclientapi;
 import android.util.Log;
 
 import java.math.BigInteger;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
 
 import com.koushikdutta.async.callback.CompletedCallback;
 import com.koushikdutta.async.http.AsyncHttpClient;
 import com.koushikdutta.async.http.WebSocket;
-import com.koushikdutta.async.http.WebSocketHandshakeException;
-import com.koushikdutta.async.http.WebSocketImpl;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -26,20 +22,22 @@ public class JanusWebsocketMessenger implements IJanusMessenger {
     private final IJanusMessageObserver handler;
     private final JanusMessengerType type = JanusMessengerType.websocket;
     private WebSocket client = null;
+
     public JanusWebsocketMessenger(String uri, IJanusMessageObserver handler) throws URISyntaxException {
         this.uri = uri;
         this.handler = handler;
     }
 
     @Override
-    public JanusMessengerType getMessengerType() { return type; }
+    public JanusMessengerType getMessengerType() {
+        return type;
+    }
 
-    public void connect()
-    {
-        AsyncHttpClient.getDefaultInstance().websocket(uri, "janus-protocol", new AsyncHttpClient.WebSocketConnectCallback(){
+    public void connect() {
+        AsyncHttpClient.getDefaultInstance().websocket(uri, "janus-protocol", new AsyncHttpClient.WebSocketConnectCallback() {
             @Override
             public void onCompleted(Exception ex, WebSocket webSocket) {
-                if(ex != null) {
+                if (ex != null) {
                     handler.onError(ex);
                 }
                 client = webSocket;
@@ -65,7 +63,7 @@ public class JanusWebsocketMessenger implements IJanusMessenger {
     }
 
     public void onMessage(String message) {
-        Log.w("onMessage", message);
+        Log.d("JANUSCLIENT", "Recv: \n\t" + message);
         receivedMessage(message);
     }
 
@@ -84,30 +82,26 @@ public class JanusWebsocketMessenger implements IJanusMessenger {
 
     @Override
     public void sendMessage(String message) {
-        Log.w("sendMessage", message);
+        Log.d("JANUSCLIENT", "Sent: \n\t" + message);
         client.send(message);
     }
 
     @Override
-    public void sendMessage(String message, BigInteger session_id)
-    {
+    public void sendMessage(String message, BigInteger session_id) {
         sendMessage(message);
     }
 
     @Override
-    public void sendMessage(String message, BigInteger session_id, BigInteger handle_id)
-    {
+    public void sendMessage(String message, BigInteger session_id, BigInteger handle_id) {
         sendMessage(message);
     }
 
     @Override
-    public void receivedMessage(String msg){
+    public void receivedMessage(String msg) {
         try {
             JSONObject obj = new JSONObject(msg);
             handler.receivedNewMessage(obj);
-        }
-        catch(JSONException ex)
-        {
+        } catch (JSONException ex) {
             handler.onError(ex);
         }
     }

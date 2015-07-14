@@ -7,8 +7,8 @@ public class JanusMediaConstraints {
 
     public class JanusVideo {
         private int maxHeight, minHeight, maxWidth, minWidth, maxFramerate, minFramerate;
-        public JanusVideo()
-        {
+
+        public JanusVideo() {
             maxFramerate = 15;
             minFramerate = 0;
             maxHeight = 240;
@@ -16,6 +16,7 @@ public class JanusMediaConstraints {
             maxWidth = 320;
             minWidth = 0;
         }
+
         public int getMaxHeight() {
             return maxHeight;
         }
@@ -65,7 +66,7 @@ public class JanusMediaConstraints {
         }
     }
 
-    public enum Camera{
+    public enum Camera {
         front,
         back
     }
@@ -76,7 +77,8 @@ public class JanusMediaConstraints {
     private Boolean recvAudio = true;
     private Camera camera = Camera.front;
 
-    public JanusMediaConstraints() { }
+    public JanusMediaConstraints() {
+    }
 
     public JanusVideo getVideo() {
         return video;
@@ -98,11 +100,28 @@ public class JanusMediaConstraints {
         this.sendAudio = sendAudio;
     }
 
-    public void setRecvVideo(Boolean recvVideo) { this.recvVideo = recvVideo;}
-    public Boolean getRecvVideo() { return recvVideo;}
-    public void setRecvAudio(Boolean recvAudio) { this.recvAudio = recvAudio;}
-    public Boolean getRecvAudio() { return recvAudio; }
-    public Camera getCamera() { return camera;}
-    public void setCamera(Camera camera) { this.camera = camera;}
+    public void setRecvVideo(Boolean recvVideo) {
+        this.recvVideo = recvVideo;
+    }
+
+    public Boolean getRecvVideo() {
+        return recvVideo;
+    }
+
+    public void setRecvAudio(Boolean recvAudio) {
+        this.recvAudio = recvAudio;
+    }
+
+    public Boolean getRecvAudio() {
+        return recvAudio;
+    }
+
+    public Camera getCamera() {
+        return camera;
+    }
+
+    public void setCamera(Camera camera) {
+        this.camera = camera;
+    }
 
 }

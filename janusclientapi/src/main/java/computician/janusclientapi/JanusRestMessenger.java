@@ -12,13 +12,16 @@ public class JanusRestMessenger implements IJanusMessenger {
     private final IJanusMessageObserver handler;
     private final URI uri;
     private final JanusMessengerType type = JanusMessengerType.restful;
+
     public JanusRestMessenger(String uri, IJanusMessageObserver handler) throws URISyntaxException {
         this.handler = handler;
         this.uri = new URI(uri);
     }
 
     @Override
-    public JanusMessengerType getMessengerType() { return type; }
+    public JanusMessengerType getMessengerType() {
+        return type;
+    }
 
     @Override
     public void connect() {
@@ -36,14 +39,12 @@ public class JanusRestMessenger implements IJanusMessenger {
     }
 
     @Override
-    public void sendMessage(String message, BigInteger session_id)
-    {
+    public void sendMessage(String message, BigInteger session_id) {
         //todo
     }
 
     @Override
-    public void sendMessage(String message, BigInteger session_id, BigInteger handle_id)
-    {
+    public void sendMessage(String message, BigInteger session_id, BigInteger handle_id) {
         //todo
     }
 
@@ -53,5 +54,6 @@ public class JanusRestMessenger implements IJanusMessenger {
     }
 
     @Override
-    public void receivedMessage(String msg){}
+    public void receivedMessage(String msg) {
+    }
 }

@@ -18,26 +18,29 @@ public enum JanusSupportedPluginPackages {
     public String toString() {
         return plugin_name;
     }
-    public boolean EqualsString(String str) { return plugin_name == str; }
-    private JanusSupportedPluginPackages(String plugin_name)
-    {
+
+    public boolean EqualsString(String str) {
+        return plugin_name == str;
+    }
+
+    private JanusSupportedPluginPackages(String plugin_name) {
         this.plugin_name = plugin_name;
     }
-    public static JanusSupportedPluginPackages fromString(String string)
-    {
-        if(JANUS_AUDIO_BRIDGE.EqualsString(string))
+
+    public static JanusSupportedPluginPackages fromString(String string) {
+        if (JANUS_AUDIO_BRIDGE.EqualsString(string))
             return JANUS_AUDIO_BRIDGE;
-        else if(JANUS_ECHO_TEST.EqualsString(string))
+        else if (JANUS_ECHO_TEST.EqualsString(string))
             return JANUS_ECHO_TEST;
-        else if(JANUS_RECORD_PLAY.EqualsString(string))
+        else if (JANUS_RECORD_PLAY.EqualsString(string))
             return JANUS_RECORD_PLAY;
-        else if(JANUS_STREAMING.EqualsString(string))
+        else if (JANUS_STREAMING.EqualsString(string))
             return JANUS_STREAMING;
-        else if(JANUS_SIP.EqualsString(string))
+        else if (JANUS_SIP.EqualsString(string))
             return JANUS_SIP;
-        else if(JANUS_VIDEO_CALL.EqualsString(string))
+        else if (JANUS_VIDEO_CALL.EqualsString(string))
             return JANUS_VIDEO_CALL;
-        else if(JANUS_VIDEO_ROOM.EqualsString(string))
+        else if (JANUS_VIDEO_ROOM.EqualsString(string))
             return JANUS_VIDEO_ROOM;
         else if (JANUS_VOICE_MAIL.EqualsString(string))
             return JANUS_VOICE_MAIL;

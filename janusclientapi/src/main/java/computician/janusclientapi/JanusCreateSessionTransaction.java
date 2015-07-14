@@ -9,33 +9,25 @@ import org.json.JSONObject;
 public class JanusCreateSessionTransaction implements ITransactionCallbacks {
 
     private final IJanusSessionCreationCallbacks callbacks;
-    public JanusCreateSessionTransaction(IJanusSessionCreationCallbacks callbacks)
-    {
+
+    public JanusCreateSessionTransaction(IJanusSessionCreationCallbacks callbacks) {
         this.callbacks = callbacks;
     }
 
-    public TransactionType getTransactionType()
-    {
+    public TransactionType getTransactionType() {
         return TransactionType.create;
     }
 
     @Override
-    public void reportSuccess(JSONObject obj)
-    {
-        try
-        {
+    public void reportSuccess(JSONObject obj) {
+        try {
             JanusMessageType type = JanusMessageType.fromString(obj.getString("janus"));
-            if(type != JanusMessageType.success)
-            {
+            if (type != JanusMessageType.success) {
                 callbacks.onCallbackError(obj.getJSONObject("error").getString("reason"));
-            }
-            else
-            {
+            } else {
                 callbacks.onSessionCreationSuccess((obj));
             }
-        }
-        catch(JSONException ex)
-        {
+        } catch (JSONException ex) {
             callbacks.onCallbackError(ex.getMessage());
         }
     }

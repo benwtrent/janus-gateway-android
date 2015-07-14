@@ -5,14 +5,23 @@ package computician.janusclientapi; /**
 import org.json.JSONObject;
 import org.webrtc.MediaStream;
 import org.webrtc.SessionDescription;
+
 public interface IJanusPluginCallbacks extends IJanusCallbacks {
     void success(JanusPluginHandle handle);
+
     void onMessage(JSONObject msg, JSONObject jsep);
+
     void onLocalStream(MediaStream stream);
+
     void onRemoteStream(MediaStream stream);
+
     void onDataOpen(Object data);
+
     void onData(Object data);
+
     void onCleanup();
+
     void onDetached();
+
     JanusSupportedPluginPackages getPlugin();
 }

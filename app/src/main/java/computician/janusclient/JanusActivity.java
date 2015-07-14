@@ -3,21 +3,11 @@ package computician.janusclient;
 import computician.janusclient.util.SystemUiHider;
 import computician.janusclientapi.*;
 
-
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.opengl.EGLContext;
 import android.opengl.GLSurfaceView;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.provider.MediaStore;
-import android.support.annotation.NonNull;
 import android.util.Log;
-import android.util.Printer;
-import android.view.MotionEvent;
-import android.view.SurfaceView;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -28,49 +18,34 @@ import org.webrtc.PeerConnection;
 import org.webrtc.VideoRenderer;
 import org.webrtc.VideoRendererGui;
 
-import java.io.Console;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
+import java.io.Console;
 
 public class JanusActivity extends Activity {
     private static final boolean AUTO_HIDE = true;
     private final String JANUS_URI = "ws://192.168.1.197:8188";
     private JanusPluginHandle handle = null;
-    private static int LOCAL_X = 0;
-    private static int LOCAL_Y = 0;
-    private static int LOCAL_WIDTH = 100;
-    private static int LOCAL_HEIGHT = 100;
-    private static int REMOTE_X = 0;
-    private static int REMOTE_Y = 0;
-    private static int REMOTE_WIDTH = 100;
-    private static int REMOTE_HEIGHT = 100;
-
 
     //TODO Define these functions
     public class JanusGlobalCallbacks implements IJanusGatewayCallbacks {
 
         @Override
-        public void onSuccess()
-        {
+        public void onSuccess() {
             janusServer.Attach(new JanusPluginCallbacks());
         }
 
         @Override
-        public void onDestroy() {}
+        public void onDestroy() {
+        }
 
         @Override
-        public String getServerUri()
-        {
+        public String getServerUri() {
             return JANUS_URI;
         }
 
         @Override
-        public List<PeerConnection.IceServer> getIceServers()
-        {
+        public List<PeerConnection.IceServer> getIceServers() {
             ArrayList<PeerConnection.IceServer> iceServers = new ArrayList<PeerConnection.IceServer>();
             iceServers.add(new PeerConnection.IceServer("stun:stun.l.google.com:19302"));
             return iceServers;
@@ -87,8 +62,7 @@ public class JanusActivity extends Activity {
         }
 
         @Override
-        public void onCallbackError(String error)
-        {
+        public void onCallbackError(String error) {
 
         }
     }
@@ -96,168 +70,153 @@ public class JanusActivity extends Activity {
     public class JanusPluginCallbacks implements IJanusPluginCallbacks {
 
         @Override
-        public void success(JanusPluginHandle pluginHandle)
-        {
+        public void success(JanusPluginHandle pluginHandle) {
             JanusActivity.this.handle = pluginHandle;
-            JSONObject obj = new JSONObject();
-            try
-            {
-                obj.put("audio", true);
-                obj.put("video", true);
-                handle.sendMessage(new IPluginHandleSendMessageCallbacks() {
-                    @Override
-                    public void onSuccessSynchronous(JSONObject obj) {
-                        return;
-                    }
+            handle.sendMessage(new IPluginHandleSendMessageCallbacks() {
+                @Override
+                public void onSuccessSynchronous(JSONObject obj) {
+                    return;
+                }
 
-                    @Override
-                    public void onSuccesAsynchronous() {
-                        return;
-                    }
+                @Override
+                public void onSuccesAsynchronous() {
+                    return;
+                }
 
-                    @Override
-                    public JSONObject getJsep() {
-                        return null;
-                    }
+                @Override
+                public JSONObject getJsep() {
+                    return null;
+                }
 
-                    @Override
-                    public JSONObject getMessage() {
-                        JSONObject obj = new JSONObject();
-                        try {
-                            obj.put("audio", true);
-                            obj.put("video", true);
-                        } catch (Exception ex) {
-
-                        }
-                        return obj;
-                    }
-
-                    @Override
-                    public void onCallbackError(String error) {
-                        return;
-                    }
-                });
-                handle.createOffer(new IPluginHandleWebRTCCallbacks() {
-                    private JSONObject jsep = null;
-                    private JSONObject msg = new JSONObject();
-
-                    @Override
-                    public JSONObject getJsep() {
-                        return null;
-                    }
-
-                    @Override
-                    public void onCallbackError(String error) {
+                @Override
+                public JSONObject getMessage() {
+                    JSONObject msg = new JSONObject();
+                    JSONObject obj = new JSONObject();
+                    try {
+                        obj.put("audio", true);
+                        obj.put("video", true);
+                        msg.put("message", obj);
+                    } catch (Exception ex) {
 
                     }
+                    return msg;
+                }
 
-                    @Override
-                    public Boolean getTrickle() {
-                        return true;
+                @Override
+                public void onCallbackError(String error) {
+                    return;
+                }
+            });
+            handle.createOffer(new IPluginHandleWebRTCCallbacks() {
+                private JSONObject jsep = null;
+                private JSONObject msg = new JSONObject();
+
+                @Override
+                public JSONObject getJsep() {
+                    return null;
+                }
+
+                @Override
+                public void onCallbackError(String error) {
+
+                }
+
+                @Override
+                public Boolean getTrickle() {
+                    return true;
+                }
+
+                @Override
+                public JanusMediaConstraints getMedia() {
+                    return new JanusMediaConstraints();
+                }
+
+                @Override
+                public void onSuccess(JSONObject obj) {
+                    Log.d("JANUSCLIENT", "OnSuccess for CreateOffer called");
+                    jsep = obj;
+                    try {
+                        JSONObject body = new JSONObject();
+                        body.put("audio", true);
+                        body.put("video", true);
+                        msg.put("message", body);
+                        msg.put("jsep", jsep);
+                        handle.sendMessage(new IPluginHandleSendMessageCallbacks() {
+                            @Override
+                            public void onSuccessSynchronous(JSONObject obj) {
+
+                            }
+
+                            @Override
+                            public void onSuccesAsynchronous() {
+
+                            }
+
+                            @Override
+                            public JSONObject getJsep() {
+                                return jsep;
+                            }
+
+                            @Override
+                            public JSONObject getMessage() {
+                                return msg;
+                            }
+
+                            @Override
+                            public void onCallbackError(String error) {
+
+                            }
+                        });
+                    } catch (Exception ex) {
+
                     }
-
-                    @Override
-                    public JanusMediaConstraints getMedia() {
-                        return new JanusMediaConstraints();
-                    }
-
-                    @Override
-                    public void onSuccess(JSONObject obj) {
-                        jsep = obj;
-                        try
-                        {
-                            msg.put("audio", true);
-                            msg.put("video", true);
-                            handle.sendMessage(new IPluginHandleSendMessageCallbacks() {
-                                @Override
-                                public void onSuccessSynchronous(JSONObject obj) {
-
-                                }
-
-                                @Override
-                                public void onSuccesAsynchronous() {
-
-                                }
-
-                                @Override
-                                public JSONObject getJsep() {
-                                    return jsep;
-                                }
-
-                                @Override
-                                public JSONObject getMessage() {
-                                    return msg;
-                                }
-
-                                @Override
-                                public void onCallbackError(String error) {
-
-                                }
-                            });
-                        }catch(Exception ex)
-                        {
-
-                        }
-                    }
-                });
-
-            }catch(JSONException ex)
-            {
-
-            }
-        }
-
-        @Override
-        public void onMessage(JSONObject msg, JSONObject jsep)
-        {
+                }
+            });
 
         }
 
         @Override
-        public void onLocalStream(MediaStream stream)
-        {
+        public void onMessage(JSONObject msg, JSONObject jsep) {
+
+        }
+
+        @Override
+        public void onLocalStream(MediaStream stream) {
             stream.videoTracks.get(0).addRenderer(new VideoRenderer(localRender));
         }
 
         @Override
-        public void onRemoteStream(MediaStream stream)
-        {
+        public void onRemoteStream(MediaStream stream) {
             stream.videoTracks.get(0).addRenderer(new VideoRenderer(remoteRender));
         }
 
         @Override
-        public void onDataOpen(Object data)
-        {
+        public void onDataOpen(Object data) {
 
         }
 
         @Override
-        public void onData(Object data)
-        {
+        public void onData(Object data) {
 
         }
 
         @Override
-        public void onCleanup()
-        {
+        public void onCleanup() {
 
         }
 
         @Override
-        public JanusSupportedPluginPackages getPlugin()
-        {
+        public JanusSupportedPluginPackages getPlugin() {
             return JanusSupportedPluginPackages.JANUS_ECHO_TEST;
         }
 
         @Override
-        public void onCallbackError(String error)
-        {
+        public void onCallbackError(String error) {
 
         }
 
         @Override
-        public void onDetached()
-        {
+        public void onDetached() {
 
         }
 
@@ -265,18 +224,17 @@ public class JanusActivity extends Activity {
 
     public class JanusPluginWebRtcCallbacks implements IPluginHandleWebRTCCallbacks {
         @Override
-        public void onSuccess(JSONObject obj){
+        public void onSuccess(JSONObject obj) {
 
         }
 
         @Override
-        public JSONObject getJsep(){
+        public JSONObject getJsep() {
             return null;
         }
 
         @Override
-        public JanusMediaConstraints getMedia()
-        {
+        public JanusMediaConstraints getMedia() {
             return new JanusMediaConstraints();
         }
 
@@ -347,23 +305,19 @@ public class JanusActivity extends Activity {
      */
     private SystemUiHider mSystemUiHider;
 
-    public class MyInit implements Runnable{
-        public void run()
-        {
+    public class MyInit implements Runnable {
+        public void run() {
             init();
         }
     }
 
-    private void init()
-    {
+    private void init() {
         try {
             janusServer = new JanusServer(new JanusGlobalCallbacks());
             EGLContext con = VideoRendererGui.getEGLContext();
             janusServer.initializeMediaContext(this, true, true, true, con);
             janusServer.Connect();
-        }
-        catch(Exception ex)
-        {
+        } catch (Exception ex) {
             Log.w("computician.janusclient", ex.getMessage());
         }
     }

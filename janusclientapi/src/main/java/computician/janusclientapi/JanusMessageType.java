@@ -19,15 +19,17 @@ public enum JanusMessageType {
     hangup,
     detached,
     media;
+
     @Override
     public String toString() {
         return name();
     }
-    public boolean EqualsString(String type)
-    {
+
+    public boolean EqualsString(String type) {
         return this.toString() == type;
     }
-    public static JanusMessageType fromString(String string){
-        return (JanusMessageType)valueOf(JanusMessageType.class, string.toLowerCase());
+
+    public static JanusMessageType fromString(String string) {
+        return (JanusMessageType) valueOf(JanusMessageType.class, string.toLowerCase());
     }
 }

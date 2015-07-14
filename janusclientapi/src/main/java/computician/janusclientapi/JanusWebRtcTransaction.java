@@ -9,41 +9,32 @@ import org.json.JSONObject;
 public class JanusWebRtcTransaction implements ITransactionCallbacks {
     private final IPluginHandleWebRTCCallbacks callbacks;
     private final JanusSupportedPluginPackages plugin;
-    public JanusWebRtcTransaction(JanusSupportedPluginPackages plugin, IPluginHandleWebRTCCallbacks callbacks)
-    {
+
+    public JanusWebRtcTransaction(JanusSupportedPluginPackages plugin, IPluginHandleWebRTCCallbacks callbacks) {
         this.callbacks = callbacks;
         this.plugin = plugin;
     }
 
-    public TransactionType getTransactionType()
-    {
+    public TransactionType getTransactionType() {
         return TransactionType.plugin_handle_webrtc_message;
     }
 
-    public void reportSuccess(JSONObject obj)
-    {
-        try
-        {
+    public void reportSuccess(JSONObject obj) {
+        try {
             JanusMessageType type = JanusMessageType.fromString(obj.getString("janus"));
-            switch(type)
-            {
-                case success:
-                {
+            switch (type) {
+                case success: {
                     break;
                 }
-                case ack:
-                {
+                case ack: {
 
                 }
-                default:
-                {
+                default: {
                     callbacks.onCallbackError(obj.getJSONObject("error").getString("reason"));
                     break;
                 }
             }
-        }
-        catch (JSONException ex)
-        {
+        } catch (JSONException ex) {
             callbacks.onCallbackError(ex.getMessage());
         }
     }
