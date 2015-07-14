@@ -2,10 +2,15 @@ package computician.janusclientapi;
 
 import android.util.Log;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.math.BigInteger;
-import java.net.URISyntaxException;
 
+import com.koushikdutta.async.ByteBufferList;
+import com.koushikdutta.async.DataEmitter;
 import com.koushikdutta.async.callback.CompletedCallback;
+import com.koushikdutta.async.callback.DataCallback;
+import com.koushikdutta.async.callback.WritableCallback;
 import com.koushikdutta.async.http.AsyncHttpClient;
 import com.koushikdutta.async.http.WebSocket;
 
@@ -23,7 +28,7 @@ public class JanusWebsocketMessenger implements IJanusMessenger {
     private final JanusMessengerType type = JanusMessengerType.websocket;
     private WebSocket client = null;
 
-    public JanusWebsocketMessenger(String uri, IJanusMessageObserver handler) throws URISyntaxException {
+    public JanusWebsocketMessenger(String uri, IJanusMessageObserver handler) {
         this.uri = uri;
         this.handler = handler;
     }
@@ -41,6 +46,33 @@ public class JanusWebsocketMessenger implements IJanusMessenger {
                     handler.onError(ex);
                 }
                 client = webSocket;
+                client.setWriteableCallback(new WritableCallback() {
+                    @Override
+                    public void onWriteable() {
+                        Log.d("JANUSCLIENT", "On writable");
+                    }
+                });
+                client.setPongCallback(new WebSocket.PongCallback() {
+
+                    @Override
+                    public void onPongReceived(String s) {
+                        Log.d("JANUSCLIENT", "Pong callback");
+                    }
+                });
+                client.setDataCallback(new DataCallback() {
+
+                    @Override
+                    public void onDataAvailable(DataEmitter emitter, ByteBufferList bb) {
+                        Log.d("JANUSCLIENT", "New Data");
+                    }
+                });
+                client.setEndCallback(new CompletedCallback() {
+
+                    @Override
+                    public void onCompleted(Exception ex) {
+                        Log.d("JANUSCLIENT", "Client End");
+                    }
+                });
                 client.setStringCallback(new WebSocket.StringCallback() {
                     @Override
                     public void onStringAvailable(String s) {
@@ -53,6 +85,11 @@ public class JanusWebsocketMessenger implements IJanusMessenger {
                         Log.d("JANUSCLIENT", "Socket closed for some reason");
                         if (ex != null) {
                             Log.d("JANUSCLIENT", "SOCKET EX " + ex.getMessage());
+                            StringWriter writer = new StringWriter();
+                            PrintWriter printWriter = new PrintWriter( writer );
+                            ex.printStackTrace( printWriter );
+                            printWriter.flush();
+                            Log.d("JANUSCLIENT", "StackTrace \n\t" + writer.toString());
                         }
                         if (ex != null) {
                             onError(ex);
@@ -61,6 +98,7 @@ public class JanusWebsocketMessenger implements IJanusMessenger {
                         }
                     }
                 });
+
                 handler.onOpen();
             }
         });
@@ -105,7 +143,7 @@ public class JanusWebsocketMessenger implements IJanusMessenger {
         try {
             JSONObject obj = new JSONObject(msg);
             handler.receivedNewMessage(obj);
-        } catch (JSONException ex) {
+        } catch (Exception ex) {
             handler.onError(ex);
         }
     }

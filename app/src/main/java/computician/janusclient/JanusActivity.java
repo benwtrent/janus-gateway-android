@@ -209,11 +209,14 @@ public class JanusActivity extends Activity {
         @Override
         public void onLocalStream(MediaStream stream) {
             stream.videoTracks.get(0).addRenderer(new VideoRenderer(localRender));
+            VideoRendererGui.update(localRender, 0, 0, 100, 100, VideoRendererGui.ScalingType.SCALE_ASPECT_FILL, false);
         }
 
         @Override
         public void onRemoteStream(MediaStream stream) {
             stream.videoTracks.get(0).addRenderer(new VideoRenderer(remoteRender));
+            VideoRendererGui.update(remoteRender, 0, 0, 100, 100, VideoRendererGui.ScalingType.SCALE_ASPECT_FILL, true);
+            VideoRendererGui.update(localRender, 72, 72, 25, 25, VideoRendererGui.ScalingType.SCALE_ASPECT_FILL, false);
         }
 
         @Override
@@ -364,6 +367,6 @@ public class JanusActivity extends Activity {
         VideoRendererGui.setView(vsv, new MyInit());
 
         localRender = VideoRendererGui.create(70, 5, 25, 25, VideoRendererGui.ScalingType.SCALE_ASPECT_FILL, false);
-        remoteRender = VideoRendererGui.create(0, 0, 100, 100, VideoRendererGui.ScalingType.SCALE_ASPECT_FILL, false);
+        remoteRender = VideoRendererGui.create(0, 0, 100, 100, VideoRendererGui.ScalingType.SCALE_ASPECT_FILL, true);
     }
 }

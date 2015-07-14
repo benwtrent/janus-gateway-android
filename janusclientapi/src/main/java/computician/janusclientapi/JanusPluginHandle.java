@@ -36,6 +36,7 @@ public class JanusPluginHandle {
 
         @Override
         public void onSetSuccess() {
+            Log.d("JANUSCLIENT", "On Set Success");
             if (mySdp == null) {
                 createSdpInternal(webRtcCallbacks, false);
             }
@@ -43,22 +44,26 @@ public class JanusPluginHandle {
 
         @Override
         public void onSetFailure(String error) {
+            Log.d("JANUSCLIENT", "On set Failure");
             //todo JS api does not account for this
             webRtcCallbacks.onCallbackError(error);
         }
 
         @Override
         public void onCreateSuccess(SessionDescription sdp) {
+            Log.d("JANUSCLIENT", "Create success");
             onLocalSdp(sdp, webRtcCallbacks);
         }
 
         @Override
         public void onCreateFailure(String error) {
+            Log.d("JANUSCLIENT", "Create failure");
             webRtcCallbacks.onCallbackError(error);
         }
 
         @Override
         public void onSignalingChange(PeerConnection.SignalingState state) {
+            Log.d("JANUSCLIENT", "Signal change " + state.toString());
             switch (state) {
                 case STABLE:
                     break;
@@ -78,6 +83,7 @@ public class JanusPluginHandle {
 
         @Override
         public void onIceConnectionChange(PeerConnection.IceConnectionState state) {
+            Log.d("JANUSCLIENT", "Ice Connection change " + state.toString());
             switch (state) {
                 case DISCONNECTED:
                     break;
@@ -123,23 +129,26 @@ public class JanusPluginHandle {
 
         @Override
         public void onAddStream(MediaStream stream) {
+            Log.d("JANUSCLIENT", "onAddStream " + stream.label());
+
             remoteStream = stream;
             onRemoteStream(stream);
         }
 
         @Override
         public void onRemoveStream(MediaStream stream) {
-            //TODO
+            Log.d("JANUSCLIENT", "onRemoteStream");
         }
 
         @Override
         public void onDataChannel(DataChannel channel) {
-            //TODO
+            Log.d("JANUSCLIENT", "onDataChannel");
         }
 
         @Override
         public void onRenegotiationNeeded() {
-            //TODO
+            Log.d("JANUSCLIENT", "Renegotiation needed");
+
         }
 
     }

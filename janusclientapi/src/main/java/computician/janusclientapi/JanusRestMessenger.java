@@ -1,8 +1,10 @@
 package computician.janusclientapi;
 
 import java.math.BigInteger;
-import java.net.URI;
-import java.net.URISyntaxException;
+import com.koushikdutta.async.*;
+import com.koushikdutta.async.http.*;
+import com.koushikdutta.async.http.body.*;
+
 
 /**
  * Created by ben.trent on 5/7/2015.
@@ -10,12 +12,17 @@ import java.net.URISyntaxException;
 public class JanusRestMessenger implements IJanusMessenger {
 
     private final IJanusMessageObserver handler;
-    private final URI uri;
+    private final String uri;
     private final JanusMessengerType type = JanusMessengerType.restful;
 
-    public JanusRestMessenger(String uri, IJanusMessageObserver handler) throws URISyntaxException {
+    private void longPoll()
+    {
+
+    }
+
+    public JanusRestMessenger(String uri, IJanusMessageObserver handler) {
         this.handler = handler;
-        this.uri = new URI(uri);
+        this.uri = uri;
     }
 
     @Override

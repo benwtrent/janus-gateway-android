@@ -8,7 +8,6 @@ import org.webrtc.PeerConnection;
 import org.webrtc.PeerConnectionFactory;
 
 import java.math.BigInteger;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
@@ -49,7 +48,7 @@ public class JanusServer implements Runnable, IJanusMessageObserver, IJanusSessi
     private volatile Thread keep_alive;
     private Boolean peerConnectionFactoryInitialized = false;
 
-    public JanusServer(IJanusGatewayCallbacks gatewayCallbacks) throws URISyntaxException {
+    public JanusServer(IJanusGatewayCallbacks gatewayCallbacks) {
         gatewayObserver = gatewayCallbacks;
         java.lang.System.setProperty("java.net.preferIPv6Addresses", "false");
         java.lang.System.setProperty("java.net.preferIPv4Stack", "true");
@@ -256,7 +255,7 @@ public class JanusServer implements Runnable, IJanusMessageObserver, IJanusSessi
                 transaction = obj.getString("transaction");
             }
             if (obj.has("sender"))
-                sender = (BigInteger) obj.get("sender");
+                sender = new BigInteger(obj.getString("sender"));
             JanusPluginHandle handle = null;
             if (sender != null) {
                 synchronized (attachedPluginsLock) {
