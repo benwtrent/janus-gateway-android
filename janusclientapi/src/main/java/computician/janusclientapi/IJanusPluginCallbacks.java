@@ -4,7 +4,6 @@ package computician.janusclientapi; /**
 
 import org.json.JSONObject;
 import org.webrtc.MediaStream;
-import org.webrtc.SessionDescription;
 
 public interface IJanusPluginCallbacks extends IJanusCallbacks {
     void success(JanusPluginHandle handle);

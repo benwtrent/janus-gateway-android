@@ -14,7 +14,6 @@ import com.koushikdutta.async.callback.WritableCallback;
 import com.koushikdutta.async.http.AsyncHttpClient;
 import com.koushikdutta.async.http.WebSocket;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 
