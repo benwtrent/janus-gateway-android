@@ -45,7 +45,7 @@ public class JanusActivity extends Activity {
         @Override
         public List<PeerConnection.IceServer> getIceServers() {
             ArrayList<PeerConnection.IceServer> iceServers = new ArrayList<PeerConnection.IceServer>();
-            iceServers.add(new PeerConnection.IceServer("stun:stun.l.google.com:19302"));
+            //iceServers.add(new PeerConnection.IceServer("stun:stun.l.google.com:19302"));
             return iceServers;
         }
 
@@ -121,7 +121,7 @@ public class JanusActivity extends Activity {
 
                 @Override
                 public Boolean getTrickle() {
-                    return false;
+                    return true;
                 }
 
                 @Override
@@ -178,6 +178,7 @@ public class JanusActivity extends Activity {
             if(jsepLocal != null)
             {
                 handle.handleRemoteJsep(new IPluginHandleWebRTCCallbacks() {
+                    JSONObject myJsep = jsepLocal;
                     @Override
                     public void onSuccess(JSONObject obj) {
 
@@ -185,7 +186,7 @@ public class JanusActivity extends Activity {
 
                     @Override
                     public JSONObject getJsep() {
-                        return jsepLocal;
+                        return myJsep;
                     }
 
                     @Override
@@ -209,13 +210,16 @@ public class JanusActivity extends Activity {
         @Override
         public void onLocalStream(MediaStream stream) {
             stream.videoTracks.get(0).addRenderer(new VideoRenderer(localRender));
-            VideoRendererGui.update(localRender, 0, 0, 100, 100, VideoRendererGui.ScalingType.SCALE_ASPECT_FILL, false);
+            VideoRendererGui.update(localRender, 0, 0, 25, 25, VideoRendererGui.ScalingType.SCALE_ASPECT_FILL, false);
         }
 
         @Override
         public void onRemoteStream(MediaStream stream) {
+            stream.videoTracks.get(0).setEnabled(true);
+            if(stream.videoTracks.get(0).enabled())
+                Log.d("JANUSCLIENT", "video tracks enabled");
             stream.videoTracks.get(0).addRenderer(new VideoRenderer(remoteRender));
-            VideoRendererGui.update(remoteRender, 0, 0, 100, 100, VideoRendererGui.ScalingType.SCALE_ASPECT_FILL, true);
+            VideoRendererGui.update(remoteRender, 0, 0, 25, 25, VideoRendererGui.ScalingType.SCALE_ASPECT_FILL, true);
             VideoRendererGui.update(localRender, 72, 72, 25, 25, VideoRendererGui.ScalingType.SCALE_ASPECT_FILL, false);
         }
 
@@ -367,6 +371,6 @@ public class JanusActivity extends Activity {
         VideoRendererGui.setView(vsv, new MyInit());
 
         localRender = VideoRendererGui.create(70, 5, 25, 25, VideoRendererGui.ScalingType.SCALE_ASPECT_FILL, false);
-        remoteRender = VideoRendererGui.create(0, 0, 100, 100, VideoRendererGui.ScalingType.SCALE_ASPECT_FILL, true);
+        remoteRender = VideoRendererGui.create(0, 0, 25, 25, VideoRendererGui.ScalingType.SCALE_ASPECT_FILL, true);
     }
 }

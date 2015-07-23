@@ -124,7 +124,7 @@ public class JanusServer implements Runnable, IJanusMessageObserver, IJanusSessi
         return sessionId;
     }
 
-    public void Attach(IJanusPluginCallbacks callbacks) {
+    public void Attach(IJanusPluginCallbacks callbacks) { //TODO make it async
         if (!peerConnectionFactoryInitialized) {
             callbacks.onCallbackError("Peerconnection factory is not initialized, please initialize via initializeMediaContext so that peerconnections can be made by the plugins");
             return;
