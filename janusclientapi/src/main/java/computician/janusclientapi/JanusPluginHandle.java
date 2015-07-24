@@ -1,5 +1,6 @@
 package computician.janusclientapi;
 
+import android.os.AsyncTask;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -7,6 +8,7 @@ import org.json.JSONObject;
 import org.webrtc.*;
 
 import java.math.BigInteger;
+import java.util.concurrent.locks.AbstractOwnableSynchronizer;
 
 /**
  * Created by ben.trent on 6/25/2015.
@@ -162,6 +164,47 @@ public class JanusPluginHandle {
     public final BigInteger id;
     private final IJanusPluginCallbacks callbacks;
 
+    private class AsyncPrepareWebRtc extends AsyncTask<IPluginHandleWebRTCCallbacks, Void, Void> {
+
+        @Override
+        protected Void doInBackground(IPluginHandleWebRTCCallbacks... params) {
+            IPluginHandleWebRTCCallbacks cb = params[0];
+            prepareWebRtc(cb);
+            return null;
+        }
+    }
+
+    private class AsyncHandleRemoteJsep extends AsyncTask<IPluginHandleWebRTCCallbacks, Void, Void> {
+        @Override
+        protected Void doInBackground(IPluginHandleWebRTCCallbacks... params) {
+            IPluginHandleWebRTCCallbacks webrtcCallbacks = params[0];
+            if (sessionFactory == null) {
+                webrtcCallbacks.onCallbackError("WebRtc PeerFactory is not initialized. Please call initializeMediaContext");
+                return null;
+            }
+            JSONObject jsep = webrtcCallbacks.getJsep();
+            if (jsep != null) {
+                if (pc == null) {
+                    Log.d("JANUSCLIENT", "could not set remote offer");
+                    callbacks.onCallbackError("No peerconnection created, if this is an answer please use createAnswer");
+                    return null;
+                }
+                try {
+
+                    String sdpString = jsep.getString("sdp");
+                    Log.d("JANUSCLIENT", sdpString);
+                    SessionDescription.Type type = SessionDescription.Type.fromCanonicalForm(jsep.getString("type"));
+                    SessionDescription sdp = new SessionDescription(type, sdpString);
+                    pc.setRemoteDescription(new WebRtcObserver(webrtcCallbacks), sdp);
+                } catch (JSONException ex) {
+                    Log.d("JANUSCLIENT", ex.getMessage());
+                    webrtcCallbacks.onCallbackError(ex.getMessage());
+                }
+            }
+            return null;
+        }
+    }
+
     public JanusPluginHandle(JanusServer server, JanusSupportedPluginPackages plugin, BigInteger handle_id, IJanusPluginCallbacks callbacks) {
         this.server = server;
         this.plugin = plugin;
@@ -175,7 +218,7 @@ public class JanusPluginHandle {
             JSONObject obj = new JSONObject(msg);
             callbacks.onMessage(obj, null);
         } catch (JSONException ex) {
-
+            //TODO do we want to notify the GatewayHandler?
         }
     }
 
@@ -237,23 +280,11 @@ public class JanusPluginHandle {
     }
 
     public void createOffer(IPluginHandleWebRTCCallbacks webrtcCallbacks) {
-        asyncPrepareWebRtc(webrtcCallbacks);
+        new AsyncPrepareWebRtc().execute(webrtcCallbacks);
     }
 
     public void createAnswer(IPluginHandleWebRTCCallbacks webrtcCallbacks) {
-        asyncPrepareWebRtc(webrtcCallbacks);
-    }
-
-    private void asyncPrepareWebRtc(final IPluginHandleWebRTCCallbacks callbacks)
-    {
-        Thread thread = new Thread(new Runnable() {
-            IPluginHandleWebRTCCallbacks cb = callbacks;
-            @Override
-            public void run() {
-                prepareWebRtc(cb);
-            }
-        });
-        thread.start();
+        new AsyncPrepareWebRtc().execute(webrtcCallbacks);
     }
 
     private void prepareWebRtc(IPluginHandleWebRTCCallbacks callbacks) {
@@ -329,41 +360,8 @@ public class JanusPluginHandle {
         }
     }
 
-    private void asyncHandleRemoteJsep(final IPluginHandleWebRTCCallbacks webRTCCallbacks) {
-        Thread thread = new Thread(new Runnable() {
-            IPluginHandleWebRTCCallbacks webrtcCallbacks = webRTCCallbacks;
-            @Override
-            public void run() {
-                if (sessionFactory == null) {
-                    webrtcCallbacks.onCallbackError("WebRtc PeerFactory is not initialized. Please call initializeMediaContext");
-                    return;
-                }
-                JSONObject jsep = webrtcCallbacks.getJsep();
-                if (jsep != null) {
-                    if (pc == null) {
-                        Log.d("JANUSCLIENT", "could not set remote offer");
-                        callbacks.onCallbackError("No peerconnection created, if this is an answer please use createAnswer");
-                        return;
-                    }
-                    try {
-
-                        String sdpString = jsep.getString("sdp");
-                        Log.d("JANUSCLIENT", sdpString);
-                        SessionDescription.Type type = SessionDescription.Type.fromCanonicalForm(jsep.getString("type"));
-                        SessionDescription sdp = new SessionDescription(type, sdpString);
-                        pc.setRemoteDescription(new WebRtcObserver(webrtcCallbacks), sdp);
-                    } catch (JSONException ex) {
-                        Log.d("JANUSCLIENT", ex.getMessage());
-                        webrtcCallbacks.onCallbackError(ex.getMessage());
-                    }
-                }
-            }
-        });
-        thread.start();
-    }
-
     public void handleRemoteJsep(IPluginHandleWebRTCCallbacks webrtcCallbacks) {
-        asyncHandleRemoteJsep(webrtcCallbacks);
+        new AsyncHandleRemoteJsep().execute(webrtcCallbacks);
     }
 
     public void hangUp() {
@@ -394,7 +392,7 @@ public class JanusPluginHandle {
         server.sendMessage(obj, JanusMessageType.detach, id);
     }
 
-    public void onLocalSdp(SessionDescription sdp, IPluginHandleWebRTCCallbacks callbacks) {
+    private void onLocalSdp(SessionDescription sdp, IPluginHandleWebRTCCallbacks callbacks) {
         if (pc != null) {
             if (mySdp == null) {
                 mySdp = sdp;

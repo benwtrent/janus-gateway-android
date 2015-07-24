@@ -13,6 +13,7 @@ import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 import android.opengl.EGLContext;
+import android.os.AsyncTask;
 
 /**
  * Created by ben.trent on 5/7/2015.
@@ -48,6 +49,26 @@ public class JanusServer implements Runnable, IJanusMessageObserver, IJanusSessi
     private volatile Thread keep_alive;
     private Boolean peerConnectionFactoryInitialized = false;
 
+    private class AsyncAttach extends AsyncTask<IJanusPluginCallbacks, Void ,Void>{
+        protected Void doInBackground(IJanusPluginCallbacks... cbs){
+            IJanusPluginCallbacks cb = cbs[0];
+            try {
+                JSONObject obj = new JSONObject();
+                obj.put("janus", JanusMessageType.attach);
+                obj.put("plugin", cb.getPlugin());
+                if (serverConnection.getMessengerType() == JanusMessengerType.websocket)
+                    obj.put("session_id", sessionId);
+                ITransactionCallbacks tcb = JanusTransactionCallbackFactory.createNewTransactionCallback(JanusServer.this, TransactionType.attach, cb.getPlugin(), cb);
+                String transaction = putNewTransaction(tcb);
+                obj.put("transaction", transaction);
+                serverConnection.sendMessage(obj.toString(), sessionId);
+            } catch (JSONException ex) {
+                onCallbackError(ex.getMessage());
+            }
+            return null;
+        };
+    }
+
     public JanusServer(IJanusGatewayCallbacks gatewayCallbacks) {
         gatewayObserver = gatewayCallbacks;
         java.lang.System.setProperty("java.net.preferIPv6Addresses", "false");
@@ -60,7 +81,6 @@ public class JanusServer implements Runnable, IJanusMessageObserver, IJanusSessi
         sessionId = new BigInteger("-1");
         serverConnection = JanusMessagerFactory.createMessager(serverUri, this);
     }
-
 
     private String putNewTransaction(ITransactionCallbacks transactionCallbacks) {
         String transaction = stringGenerator.randomString(12);
@@ -124,24 +144,12 @@ public class JanusServer implements Runnable, IJanusMessageObserver, IJanusSessi
         return sessionId;
     }
 
-    public void Attach(IJanusPluginCallbacks callbacks) { //TODO make it async
+    public void Attach(IJanusPluginCallbacks callbacks) {
         if (!peerConnectionFactoryInitialized) {
             callbacks.onCallbackError("Peerconnection factory is not initialized, please initialize via initializeMediaContext so that peerconnections can be made by the plugins");
             return;
         }
-        try {
-            JSONObject obj = new JSONObject();
-            obj.put("janus", JanusMessageType.attach);
-            obj.put("plugin", callbacks.getPlugin());
-            if (serverConnection.getMessengerType() == JanusMessengerType.websocket)
-                obj.put("session_id", sessionId);
-            ITransactionCallbacks cb = JanusTransactionCallbackFactory.createNewTransactionCallback(this, TransactionType.attach, callbacks.getPlugin(), callbacks);
-            String transaction = putNewTransaction(cb);
-            obj.put("transaction", transaction);
-            serverConnection.sendMessage(obj.toString(), sessionId);
-        } catch (JSONException ex) {
-            onCallbackError(ex.getMessage());
-        }
+        new AsyncAttach().execute(callbacks);
     }
 
     public void Destroy() {
@@ -177,7 +185,6 @@ public class JanusServer implements Runnable, IJanusMessageObserver, IJanusSessi
         gatewayObserver.onCallbackError(msg);
     }
 
-
     public void sendMessage(JSONObject msg, JanusMessageType type, BigInteger handle) {
         try {
             msg.put("janus", type.toString());
@@ -198,6 +205,8 @@ public class JanusServer implements Runnable, IJanusMessageObserver, IJanusSessi
             gatewayObserver.onCallbackError(ex.getMessage());
         }
     }
+
+    //TODO not sure if the send message functions should be Asynchronous
 
     public void sendMessage(TransactionType type, BigInteger handle, IPluginHandleSendMessageCallbacks callbacks, JanusSupportedPluginPackages plugin) {
         JSONObject msg = callbacks.getMessage();
@@ -279,6 +288,12 @@ public class JanusServer implements Runnable, IJanusMessageObserver, IJanusSessi
                             cb.reportSuccess(obj);
                             transactions.remove(transaction);
                         }
+                    }
+                    break;
+                }
+                case hangup: {
+                    if(handle != null) {
+                        handle.hangUp();
                     }
                     break;
                 }
