@@ -15,17 +15,18 @@ import java.util.List;
 
 import computician.janusclientapi.IJanusGatewayCallbacks;
 import computician.janusclientapi.IJanusPluginCallbacks;
-import computician.janusclientapi.IPluginHandleSendMessageCallbacks;
 import computician.janusclientapi.IPluginHandleWebRTCCallbacks;
 import computician.janusclientapi.JanusMediaConstraints;
 import computician.janusclientapi.JanusPluginHandle;
 import computician.janusclientapi.JanusServer;
 import computician.janusclientapi.JanusSupportedPluginPackages;
+import computician.janusclientapi.PluginHandleSendMessageCallbacks;
 
 /**
  * Created by ben.trent on 7/24/2015.
  */
 
+//TODO create message classes unique to this plugin
 
 public class EchoTest {
 
@@ -78,45 +79,19 @@ public class EchoTest {
         @Override
         public void success(JanusPluginHandle pluginHandle) {
             EchoTest.this.handle = pluginHandle;
-            handle.sendMessage(new IPluginHandleSendMessageCallbacks() {
-                @Override
-                public void onSuccessSynchronous(JSONObject obj) {
-                    return;
+
+                JSONObject msg = new JSONObject();
+                JSONObject obj = new JSONObject();
+                try {
+                    obj.put("audio", true);
+                    obj.put("video", true);
+                    msg.put("message", obj);
+                    handle.sendMessage(new PluginHandleSendMessageCallbacks(msg));
+                } catch (Exception ex) {
+
                 }
 
-                @Override
-                public void onSuccesAsynchronous() {
-                    return;
-                }
-
-                @Override
-                public JSONObject getJsep() {
-                    return null;
-                }
-
-                @Override
-                public JSONObject getMessage() {
-                    JSONObject msg = new JSONObject();
-                    JSONObject obj = new JSONObject();
-                    try {
-                        obj.put("audio", true);
-                        obj.put("video", true);
-                        msg.put("message", obj);
-                    } catch (Exception ex) {
-
-                    }
-                    return msg;
-                }
-
-                @Override
-                public void onCallbackError(String error) {
-                    return;
-                }
-            });
             handle.createOffer(new IPluginHandleWebRTCCallbacks() {
-                private JSONObject jsep = null;
-                private JSONObject msg = new JSONObject();
-
                 @Override
                 public JSONObject getJsep() {
                     return null;
@@ -140,39 +115,14 @@ public class EchoTest {
                 @Override
                 public void onSuccess(JSONObject obj) {
                     Log.d("JANUSCLIENT", "OnSuccess for CreateOffer called");
-                    jsep = obj;
                     try {
                         JSONObject body = new JSONObject();
+                        JSONObject msg = new JSONObject();
                         body.put("audio", true);
                         body.put("video", true);
                         msg.put("message", body);
-                        msg.put("jsep", jsep);
-                        handle.sendMessage(new IPluginHandleSendMessageCallbacks() {
-                            @Override
-                            public void onSuccessSynchronous(JSONObject obj) {
-
-                            }
-
-                            @Override
-                            public void onSuccesAsynchronous() {
-
-                            }
-
-                            @Override
-                            public JSONObject getJsep() {
-                                return jsep;
-                            }
-
-                            @Override
-                            public JSONObject getMessage() {
-                                return msg;
-                            }
-
-                            @Override
-                            public void onCallbackError(String error) {
-
-                            }
-                        });
+                        msg.put("jsep", obj);
+                        handle.sendMessage(new PluginHandleSendMessageCallbacks(msg));
                     } catch (Exception ex) {
 
                     }

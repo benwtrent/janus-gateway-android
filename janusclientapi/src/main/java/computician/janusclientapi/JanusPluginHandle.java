@@ -6,6 +6,7 @@ import android.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.webrtc.*;
+import org.webrtc.videoengine.VideoCaptureAndroid;
 
 import java.math.BigInteger;
 import java.util.concurrent.locks.AbstractOwnableSynchronizer;
@@ -31,7 +32,6 @@ public class JanusPluginHandle {
 
     private class WebRtcObserver implements SdpObserver, PeerConnection.Observer {
         private final IPluginHandleWebRTCCallbacks webRtcCallbacks;
-        private int sent_candidates = 0;
         public WebRtcObserver(IPluginHandleWebRTCCallbacks callbacks) {
             this.webRtcCallbacks = callbacks;
         }
@@ -70,7 +70,6 @@ public class JanusPluginHandle {
                 case STABLE:
                     break;
                 case HAVE_LOCAL_OFFER:
-                    ;
                     break;
                 case HAVE_LOCAL_PRANSWER:
                     break;
@@ -128,7 +127,6 @@ public class JanusPluginHandle {
         @Override
         public void onIceCandidate(IceCandidate candidate) {
             if(trickle){
-                sent_candidates++;
                 sendTrickleCandidate(candidate);
             }
         }
@@ -136,14 +134,13 @@ public class JanusPluginHandle {
         @Override
         public void onAddStream(MediaStream stream) {
             Log.d("JANUSCLIENT", "onAddStream " + stream.label());
-
             remoteStream = stream;
             onRemoteStream(stream);
         }
 
         @Override
         public void onRemoveStream(MediaStream stream) {
-            Log.d("JANUSCLIENT", "onRemoteStream");
+            Log.d("JANUSCLIENT", "onRemoveStream");
         }
 
         @Override

@@ -9,6 +9,8 @@ import com.koushikdutta.async.http.body.*;
 /**
  * Created by ben.trent on 5/7/2015.
  */
+
+//TODO big todo...it would be good to use androidasync as we already utilize that for the websocket endpoint
 public class JanusRestMessenger implements IJanusMessenger {
 
     private final IJanusMessageObserver handler;

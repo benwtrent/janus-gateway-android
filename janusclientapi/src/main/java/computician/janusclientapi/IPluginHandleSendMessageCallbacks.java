@@ -10,7 +10,5 @@ public interface IPluginHandleSendMessageCallbacks extends IJanusCallbacks {
 
     void onSuccesAsynchronous();
 
-    JSONObject getJsep();
-
     JSONObject getMessage();
 }

@@ -1,8 +1,6 @@
 package computician.janusclient;
 
-import android.provider.MediaStore;
-import android.util.Log;
-
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.webrtc.MediaStream;
 import org.webrtc.PeerConnection;
@@ -11,18 +9,20 @@ import org.webrtc.VideoRendererGui;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Stack;
 
-import computician.janusclientapi.IJanusCallbacks;
 import computician.janusclientapi.IJanusGatewayCallbacks;
 import computician.janusclientapi.IJanusPluginCallbacks;
-import computician.janusclientapi.IPluginHandleSendMessageCallbacks;
 import computician.janusclientapi.IPluginHandleWebRTCCallbacks;
 import computician.janusclientapi.JanusMediaConstraints;
 import computician.janusclientapi.JanusPluginHandle;
 import computician.janusclientapi.JanusServer;
 import computician.janusclientapi.JanusSupportedPluginPackages;
+import computician.janusclientapi.PluginHandleSendMessageCallbacks;
 
+//TODO create message classes unique to this plugin
 /**
  * Created by ben.trent on 7/24/2015.
  */
@@ -30,22 +30,214 @@ public class VideoRoomTest {
     private final String JANUS_URI = "ws://192.168.1.197:8188";
     private JanusPluginHandle handle = null;
     private VideoRenderer.Callbacks localRender;
-    private VideoRenderer.Callbacks[] remoteRenders;
+    private Stack<VideoRenderer.Callbacks> availableRemoteRenderers = new Stack<>();
+    private HashMap<BigInteger, VideoRenderer.Callbacks> remoteRenderers = new HashMap<>();
     private JanusServer janusServer;
+    private BigInteger myid;
+    final private String user_name = "android";
+    final private int roomid = 1234;
+
+    class ListenerAttachCallbacks implements IJanusPluginCallbacks{
+        final private VideoRenderer.Callbacks renderer;
+        final private BigInteger feedid;
+        private JanusPluginHandle listener_handle = null;
+
+        public ListenerAttachCallbacks(BigInteger id, VideoRenderer.Callbacks renderer){
+            this.renderer = renderer;
+            this.feedid = id;
+        }
+
+        public void success(JanusPluginHandle handle) {
+            listener_handle = handle;
+            try
+            {
+                JSONObject body = new JSONObject();
+                JSONObject msg = new JSONObject();
+                body.put("request", "join");
+                body.put("room", roomid);
+                body.put("ptype", "listener");
+                body.put("feed", feedid);
+                msg.put("message", body);
+                handle.sendMessage(new PluginHandleSendMessageCallbacks(msg));
+            }
+            catch(Exception ex)
+            {
+
+            }
+        }
+
+        @Override
+        public void onMessage(JSONObject msg, JSONObject jsep) {
+            if(jsep != null) {
+                listener_handle.createAnswer(new IPluginHandleWebRTCCallbacks() {
+                    @Override
+                    public void onSuccess(JSONObject obj) {
+                        try
+                        {
+                            JSONObject mymsg = new JSONObject();
+                            JSONObject body = new JSONObject();
+                            body.put("request", "start");
+                            body.put("room", roomid);
+                            mymsg.put("message", body);
+                            mymsg.put("jsep", obj);
+                            listener_handle.sendMessage(new PluginHandleSendMessageCallbacks(mymsg));
+                        }
+                        catch(Exception ex)
+                        {
+
+                        }
+                    }
+
+                    @Override
+                    public JSONObject getJsep() {
+                        return null;
+                    }
+
+                    @Override
+                    public JanusMediaConstraints getMedia() {
+                        return null;
+                    }
+
+                    @Override
+                    public Boolean getTrickle() {
+                        return null;
+                    }
+
+                    @Override
+                    public void onCallbackError(String error) {
+
+                    }
+                });
+            }
+        }
+
+        @Override
+        public void onLocalStream(MediaStream stream) {
+
+        }
+
+        @Override
+        public void onRemoteStream(MediaStream stream) {
+            stream.videoTracks.get(0).addRenderer(new VideoRenderer(renderer));
+        }
+
+        @Override
+        public void onDataOpen(Object data) {
+
+        }
+
+        @Override
+        public void onData(Object data) {
+
+        }
+
+        @Override
+        public void onCleanup() {
+
+        }
+
+        @Override
+        public void onDetached() {
+
+        }
+
+        @Override
+        public JanusSupportedPluginPackages getPlugin() {
+            return null;
+        }
+
+        @Override
+        public void onCallbackError(String error) {
+
+        }
+    }
 
     private void publishOwnFeed() {
+        if(handle != null) {
+            handle.createOffer(new IPluginHandleWebRTCCallbacks() {
+                @Override
+                public void onSuccess(JSONObject obj) {
+                    try
+                    {
+                        JSONObject msg = new JSONObject();
+                        JSONObject body = new JSONObject();
+                        body.put("request", "configure");
+                        body.put("audio", true);
+                        body.put("video", true);
+                        msg.put("message", body);
+                        msg.put("jsep", obj);
+                        handle.sendMessage(new PluginHandleSendMessageCallbacks(msg));
+                    }catch (Exception ex) {
 
+                    }
+                }
+
+                @Override
+                public JSONObject getJsep() {
+                    return null;
+                }
+
+                @Override
+                public JanusMediaConstraints getMedia() {
+                    JanusMediaConstraints cons = new JanusMediaConstraints();
+                    cons.setRecvAudio(false);
+                    cons.setRecvVideo(false);
+                    return cons;
+                }
+
+                @Override
+                public Boolean getTrickle() {
+                    return false;
+                }
+
+                @Override
+                public void onCallbackError(String error) {
+
+                }
+            });
+        }
+    }
+
+    private void registerUsername() {
+        if(handle != null) {
+            JSONObject obj = new JSONObject();
+            JSONObject msg = new JSONObject();
+            try
+            {
+                obj.put("request", "join");
+                obj.put("room", roomid);
+                obj.put("ptype", "publisher");
+                obj.put("display", user_name);
+                msg.put("message", obj);
+            }
+            catch(Exception ex)
+            {
+
+            }
+            handle.sendMessage(new PluginHandleSendMessageCallbacks(msg));
+        }
     }
 
     private void newRemoteFeed(BigInteger id) { //todo attach the plugin as a listener
-
+        VideoRenderer.Callbacks myrenderer = null;
+        if(!remoteRenderers.containsKey(id))
+        {
+            if(availableRemoteRenderers.empty())
+            {
+                //TODO no more space
+                return;
+            }
+            remoteRenderers.put(id, availableRemoteRenderers.pop());
+        }
+        myrenderer = remoteRenderers.get(id);
+        janusServer.Attach(new ListenerAttachCallbacks(id, myrenderer));
     }
-
 
     public class JanusPublisherPluginCallbacks implements IJanusPluginCallbacks {
         @Override
         public void success(JanusPluginHandle pluginHandle) {
             handle = pluginHandle;
+            registerUsername();
         }
 
         @Override
@@ -54,11 +246,24 @@ public class VideoRoomTest {
             {
                 String event = msg.getString("videoroom");
                 if(event == "joined") {
+                    myid = new BigInteger(msg.getString("id"));
                     publishOwnFeed();
                 } else if(event == "destroyed") {
 
                 } else if(event == "event") {
+                    if(msg.has("publishers")){
+                        JSONArray pubs = msg.getJSONArray("publishers");
+                        for(int i = 0; i < pubs.length(); i++) {
+                            JSONObject pub = pubs.getJSONObject(i);
+                            newRemoteFeed(new BigInteger(pub.getString("id")));
+                        }
+                    } else if(msg.has("leaving")) {
 
+                    } else if(msg.has("unpublished")) {
+
+                    } else {
+                        //todo error
+                    }
                 }
                 if(jsepLocal != null) {
                     handle.handleRemoteJsep(new IPluginHandleWebRTCCallbacks() {
@@ -177,7 +382,10 @@ public class VideoRoomTest {
 
     public VideoRoomTest(VideoRenderer.Callbacks localRender, VideoRenderer.Callbacks[] remoteRenders) {
         this.localRender = localRender;
-        this.remoteRenders = remoteRenders;
+        for(int i = 0; i < remoteRenders.length; i++)
+        {
+            this.availableRemoteRenderers.push(remoteRenders[i]);
+        }
         janusServer = new JanusServer(new JanusGlobalCallbacks());
     }
 
