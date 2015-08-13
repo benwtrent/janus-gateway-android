@@ -21,6 +21,7 @@ public class JanusActivity extends Activity {
     private VideoRenderer.Callbacks localRender;
     private VideoRenderer.Callbacks remoteRender;
     private EchoTest echoTest;
+    private VideoRoomTest videoRoomTest;
 
     /**
      * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
@@ -44,7 +45,7 @@ public class JanusActivity extends Activity {
      */
     private SystemUiHider mSystemUiHider;
 
-    public class MyInit implements Runnable {
+    private class MyInit implements Runnable {
         public void run() {
             init();
         }
@@ -52,12 +53,19 @@ public class JanusActivity extends Activity {
 
     private void init() {
         try {
-            echoTest = new EchoTest(localRender, remoteRender);
             EGLContext con = VideoRendererGui.getEGLContext();
+            /*VideoRenderer.Callbacks[] renderers = new VideoRenderer.Callbacks[1];
+            renderers[0] = remoteRender;
+            videoRoomTest = new VideoRoomTest(localRender, renderers);
+            videoRoomTest.initializeMediaContext(this, true, true, true, con);
+            videoRoomTest.Start();
+            */
+            echoTest = new EchoTest(localRender, remoteRender);
             echoTest.initializeMediaContext(this, true, true, true, con);
             echoTest.Start();
+
         } catch (Exception ex) {
-            Log.w("computician.janusclient", ex.getMessage());
+            Log.e("computician.janusclient", ex.getMessage());
         }
     }
 
@@ -76,7 +84,7 @@ public class JanusActivity extends Activity {
         vsv.setKeepScreenOn(true);
         VideoRendererGui.setView(vsv, new MyInit());
 
-        localRender = VideoRendererGui.create(70, 5, 25, 25, VideoRendererGui.ScalingType.SCALE_ASPECT_FILL, false);
+        localRender = VideoRendererGui.create(72, 72, 25, 25, VideoRendererGui.ScalingType.SCALE_ASPECT_FILL, false);
         remoteRender = VideoRendererGui.create(0, 0, 25, 25, VideoRendererGui.ScalingType.SCALE_ASPECT_FILL, true);
     }
 }

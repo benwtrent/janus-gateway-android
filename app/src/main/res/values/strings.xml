@@ -2,6 +2,4 @@
     <string name="app_name">JanusClient</string>
 
     <string name="title_activity_janus">JanusActivity</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
 </resources>

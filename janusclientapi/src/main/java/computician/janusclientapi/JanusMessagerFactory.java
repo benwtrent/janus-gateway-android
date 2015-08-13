@@ -3,7 +3,7 @@ package computician.janusclientapi;
 /**
  * Created by ben.trent on 6/25/2015.
  */
-public class JanusMessagerFactory {
+class JanusMessagerFactory {
     public static IJanusMessenger createMessager(String uri, IJanusMessageObserver handler) {
 
         if (uri.indexOf("ws") == 0) {

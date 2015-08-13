@@ -223,11 +223,11 @@ public class JanusPluginHandle {
         callbacks.onMessage(msg, jsep);
     }
 
-    public void onLocalStream(MediaStream stream) {
+    private void onLocalStream(MediaStream stream) {
         callbacks.onLocalStream(stream);
     }
 
-    public void onRemoteStream(MediaStream stream) {
+    private void onRemoteStream(MediaStream stream) {
         callbacks.onRemoteStream(stream);
     }
 
@@ -300,7 +300,7 @@ public class JanusPluginHandle {
                 }
             }
         } else {
-            trickle = callbacks.getTrickle();
+            trickle = callbacks.getTrickle() != null ? callbacks.getTrickle() : false;
             AudioTrack audioTrack = null;
             VideoTrack videoTrack = null;
             MediaStream stream = null;
@@ -346,10 +346,12 @@ public class JanusPluginHandle {
     private void createSdpInternal(IPluginHandleWebRTCCallbacks callbacks, Boolean isOffer) {
         MediaConstraints pc_cons = new MediaConstraints();
         pc_cons.optional.add(new MediaConstraints.KeyValuePair("DtlsSrtpKeyAgreement", "true"));
-        if (callbacks.getMedia().getRecvAudio())
+        if (callbacks.getMedia().getRecvAudio()) {
             pc_cons.mandatory.add(new MediaConstraints.KeyValuePair("OfferToReceiveAudio", "true"));
-        if (callbacks.getMedia().getRecvVideo())
-            pc_cons.mandatory.add(new MediaConstraints.KeyValuePair("OfferToReceiveVideo", "true"));
+        }
+        if (callbacks.getMedia().getRecvVideo()) {
+            Log.d("VIDEO_ROOM", "Receiving video");
+        }
         if (isOffer) {
             pc.createOffer(new WebRtcObserver(callbacks), pc_cons);
         } else {

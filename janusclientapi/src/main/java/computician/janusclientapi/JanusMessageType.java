@@ -26,7 +26,7 @@ public enum JanusMessageType {
     }
 
     public boolean EqualsString(String type) {
-        return this.toString() == type;
+        return this.toString().equals(type);
     }
 
     public static JanusMessageType fromString(String string) {

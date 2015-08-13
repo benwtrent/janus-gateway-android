@@ -3,7 +3,7 @@ package computician.janusclientapi;
 /**
  * Created by ben.trent on 6/25/2015.
  */
-public class JanusTransactionCallbackFactory {
+class JanusTransactionCallbackFactory {
 
     public static ITransactionCallbacks createNewTransactionCallback(JanusServer server, TransactionType type) {
         switch (type) {

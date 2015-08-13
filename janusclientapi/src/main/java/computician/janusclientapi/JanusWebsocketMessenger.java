@@ -103,16 +103,16 @@ public class JanusWebsocketMessenger implements IJanusMessenger {
         });
     }
 
-    public void onMessage(String message) {
+    private void onMessage(String message) {
         Log.d("JANUSCLIENT", "Recv: \n\t" + message);
         receivedMessage(message);
     }
 
-    public void onClose(int code, String reason, boolean remote) {
+    private void onClose(int code, String reason, boolean remote) {
         handler.onClose();
     }
 
-    public void onError(Exception ex) {
+    private void onError(Exception ex) {
         handler.onError(ex);
     }
 

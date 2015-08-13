@@ -32,8 +32,8 @@ public class EchoTest {
 
     private final String JANUS_URI = "ws://192.168.1.197:8188";
     private JanusPluginHandle handle = null;
-    private VideoRenderer.Callbacks localRender, remoteRender;
-    private JanusServer janusServer;
+    private final VideoRenderer.Callbacks localRender, remoteRender;
+    private final JanusServer janusServer;
 
     public class JanusGlobalCallbacks implements IJanusGatewayCallbacks {
 
@@ -53,9 +53,9 @@ public class EchoTest {
 
         @Override
         public List<PeerConnection.IceServer> getIceServers() {
-            ArrayList<PeerConnection.IceServer> iceServers = new ArrayList<PeerConnection.IceServer>();
+            //ArrayList<PeerConnection.IceServer> iceServers =
             //iceServers.add(new PeerConnection.IceServer("stun:stun.l.google.com:19302"));
-            return iceServers;
+            return new ArrayList<PeerConnection.IceServer>();
         }
 
         @Override
@@ -136,7 +136,7 @@ public class EchoTest {
             if(jsepLocal != null)
             {
                 handle.handleRemoteJsep(new IPluginHandleWebRTCCallbacks() {
-                    JSONObject myJsep = jsepLocal;
+                    final JSONObject myJsep = jsepLocal;
                     @Override
                     public void onSuccess(JSONObject obj) {
 

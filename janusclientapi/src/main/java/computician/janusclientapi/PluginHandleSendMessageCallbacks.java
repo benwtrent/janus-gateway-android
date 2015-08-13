@@ -7,7 +7,7 @@ import org.json.JSONObject;
  */
 public class PluginHandleSendMessageCallbacks implements IPluginHandleSendMessageCallbacks {
 
-    final JSONObject message;
+    private final JSONObject message;
 
     public PluginHandleSendMessageCallbacks(JSONObject message) {
         this.message = message;

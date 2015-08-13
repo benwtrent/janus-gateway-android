@@ -19,8 +19,8 @@ public enum JanusSupportedPluginPackages {
         return plugin_name;
     }
 
-    public boolean EqualsString(String str) {
-        return plugin_name == str;
+    private boolean EqualsString(String str) {
+        return plugin_name.equals(str);
     }
 
     private JanusSupportedPluginPackages(String plugin_name) {
