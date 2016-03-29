@@ -38,6 +38,44 @@ public class SystemUiHiderHoneycomb extends SystemUiHiderBase {
      */
     private boolean mVisible = true;
 
+    private View.OnSystemUiVisibilityChangeListener mSystemUiVisibilityChangeListener
+            = new View.OnSystemUiVisibilityChangeListener() {
+        @Override
+        public void onSystemUiVisibilityChange(int vis) {
+            // Test against mTestFlags to see if the system UI is visible.
+            if ((vis & mTestFlags) != 0) {
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+                    // Pre-Jelly Bean, we must manually hide the action bar
+                    // and use the old window flags API.
+                    mActivity.getActionBar().hide();
+                    mActivity.getWindow().setFlags(
+                            WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                            WindowManager.LayoutParams.FLAG_FULLSCREEN);
+                }
+
+                // Trigger the registered listener and cache the visibility
+                // state.
+                mOnVisibilityChangeListener.onVisibilityChange(false);
+                mVisible = false;
+
+            } else {
+                mAnchorView.setSystemUiVisibility(mShowFlags);
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+                    // Pre-Jelly Bean, we must manually show the action bar
+                    // and use the old window flags API.
+                    mActivity.getActionBar().show();
+                    mActivity.getWindow().setFlags(
+                            0,
+                            WindowManager.LayoutParams.FLAG_FULLSCREEN);
+                }
+
+                // Trigger the registered listener and cache the visibility
+                // state.
+                mOnVisibilityChangeListener.onVisibilityChange(true);
+                mVisible = true;
+            }
+        }
+    };
     /**
      * Constructor not intended to be called by clients. Use
      * {@link SystemUiHider#getInstance} to obtain an instance.
@@ -99,43 +137,4 @@ public class SystemUiHiderHoneycomb extends SystemUiHiderBase {
     public boolean isVisible() {
         return mVisible;
     }
-
-    private View.OnSystemUiVisibilityChangeListener mSystemUiVisibilityChangeListener
-            = new View.OnSystemUiVisibilityChangeListener() {
-        @Override
-        public void onSystemUiVisibilityChange(int vis) {
-            // Test against mTestFlags to see if the system UI is visible.
-            if ((vis & mTestFlags) != 0) {
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-                    // Pre-Jelly Bean, we must manually hide the action bar
-                    // and use the old window flags API.
-                    mActivity.getActionBar().hide();
-                    mActivity.getWindow().setFlags(
-                            WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                            WindowManager.LayoutParams.FLAG_FULLSCREEN);
-                }
-
-                // Trigger the registered listener and cache the visibility
-                // state.
-                mOnVisibilityChangeListener.onVisibilityChange(false);
-                mVisible = false;
-
-            } else {
-                mAnchorView.setSystemUiVisibility(mShowFlags);
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-                    // Pre-Jelly Bean, we must manually show the action bar
-                    // and use the old window flags API.
-                    mActivity.getActionBar().show();
-                    mActivity.getWindow().setFlags(
-                            0,
-                            WindowManager.LayoutParams.FLAG_FULLSCREEN);
-                }
-
-                // Trigger the registered listener and cache the visibility
-                // state.
-                mOnVisibilityChangeListener.onVisibilityChange(true);
-                mVisible = true;
-            }
-        }
-    };
 }

@@ -32,6 +32,9 @@ import computician.janusclientapi.PluginHandleWebRTCCallbacks;
  * Created by ben.trent on 7/24/2015.
  */
 public class VideoRoomTest {
+    public static final String REQUEST = "request";
+    public static final String MESSAGE = "message";
+    public static final String PUBLISHERS = "publishers";
     private final String JANUS_URI = "ws://192.168.1.197:8188";
     private JanusPluginHandle handle = null;
     private VideoRenderer.Callbacks localRender;
@@ -41,6 +44,15 @@ public class VideoRoomTest {
     private BigInteger myid;
     final private String user_name = "android";
     final private int roomid = 1234;
+
+    public VideoRoomTest(VideoRenderer.Callbacks localRender, VideoRenderer.Callbacks[] remoteRenders) {
+        this.localRender = localRender;
+        for(int i = 0; i < remoteRenders.length; i++)
+        {
+            this.availableRemoteRenderers.push(remoteRenders[i]);
+        }
+        janusServer = new JanusServer(new JanusGlobalCallbacks());
+    }
 
     class ListenerAttachCallbacks implements IJanusPluginCallbacks{
         final private VideoRenderer.Callbacks renderer;
@@ -58,11 +70,11 @@ public class VideoRoomTest {
             {
                 JSONObject body = new JSONObject();
                 JSONObject msg = new JSONObject();
-                body.put("request", "join");
+                body.put(REQUEST, "join");
                 body.put("room", roomid);
                 body.put("ptype", "listener");
                 body.put("feed", feedid);
-                msg.put("message", body);
+                msg.put(MESSAGE, body);
                 handle.sendMessage(new PluginHandleSendMessageCallbacks(msg));
             }
             catch(Exception ex)
@@ -84,9 +96,9 @@ public class VideoRoomTest {
                             try {
                                 JSONObject mymsg = new JSONObject();
                                 JSONObject body = new JSONObject();
-                                body.put("request", "start");
+                                body.put(REQUEST, "start");
                                 body.put("room", roomid);
-                                mymsg.put("message", body);
+                                mymsg.put(MESSAGE, body);
                                 mymsg.put("jsep", obj);
                                 listener_handle.sendMessage(new PluginHandleSendMessageCallbacks(mymsg));
                             } catch (Exception ex) {
@@ -177,10 +189,10 @@ public class VideoRoomTest {
                     {
                         JSONObject msg = new JSONObject();
                         JSONObject body = new JSONObject();
-                        body.put("request", "configure");
+                        body.put(REQUEST, "configure");
                         body.put("audio", true);
                         body.put("video", true);
-                        msg.put("message", body);
+                        msg.put(MESSAGE, body);
                         msg.put("jsep", obj);
                         handle.sendMessage(new PluginHandleSendMessageCallbacks(msg));
                     }catch (Exception ex) {
@@ -221,11 +233,11 @@ public class VideoRoomTest {
             JSONObject msg = new JSONObject();
             try
             {
-                obj.put("request", "join");
+                obj.put(REQUEST, "join");
                 obj.put("room", roomid);
                 obj.put("ptype", "publisher");
                 obj.put("display", user_name);
-                msg.put("message", obj);
+                msg.put(MESSAGE, obj);
             }
             catch(Exception ex)
             {
@@ -251,6 +263,7 @@ public class VideoRoomTest {
     }
 
     public class JanusPublisherPluginCallbacks implements IJanusPluginCallbacks {
+
         @Override
         public void success(JanusPluginHandle pluginHandle) {
             handle = pluginHandle;
@@ -265,8 +278,8 @@ public class VideoRoomTest {
                 if(event.equals("joined")) {
                     myid = new BigInteger(msg.getString("id"));
                     publishOwnFeed();
-                    if(msg.has("publishers")){
-                        JSONArray pubs = msg.getJSONArray("publishers");
+                    if(msg.has(PUBLISHERS)){
+                        JSONArray pubs = msg.getJSONArray(PUBLISHERS);
                         for(int i = 0; i < pubs.length(); i++) {
                             JSONObject pub = pubs.getJSONObject(i);
                             BigInteger tehId = new BigInteger(pub.getString("id"));
@@ -276,8 +289,8 @@ public class VideoRoomTest {
                 } else if(event.equals("destroyed")) {
 
                 } else if(event.equals("event")) {
-                    if(msg.has("publishers")){
-                        JSONArray pubs = msg.getJSONArray("publishers");
+                    if(msg.has(PUBLISHERS)){
+                        JSONArray pubs = msg.getJSONArray(PUBLISHERS);
                         for(int i = 0; i < pubs.length(); i++) {
                             JSONObject pub = pubs.getJSONObject(i);
                             newRemoteFeed(new BigInteger(pub.getString("id")));
@@ -357,8 +370,6 @@ public class VideoRoomTest {
 
         @Override
         public List<PeerConnection.IceServer> getIceServers() {
-            //ArrayList<PeerConnection.IceServer> iceServers = new ArrayList<PeerConnection.IceServer>();
-            //iceServers.add(new PeerConnection.IceServer("stun:stun.l.google.com:19302"));
             return new ArrayList<PeerConnection.IceServer>();
         }
 
@@ -376,15 +387,6 @@ public class VideoRoomTest {
         public void onCallbackError(String error) {
 
         }
-    }
-
-    public VideoRoomTest(VideoRenderer.Callbacks localRender, VideoRenderer.Callbacks[] remoteRenders) {
-        this.localRender = localRender;
-        for(int i = 0; i < remoteRenders.length; i++)
-        {
-            this.availableRemoteRenderers.push(remoteRenders[i]);
-        }
-        janusServer = new JanusServer(new JanusGlobalCallbacks());
     }
 
     public boolean initializeMediaContext(Context context, boolean audio, boolean video, boolean videoHwAcceleration, EGLContext eglContext){

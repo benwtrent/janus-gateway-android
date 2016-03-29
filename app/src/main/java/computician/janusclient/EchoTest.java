@@ -53,8 +53,6 @@ public class EchoTest {
 
         @Override
         public List<PeerConnection.IceServer> getIceServers() {
-            //ArrayList<PeerConnection.IceServer> iceServers =
-            //iceServers.add(new PeerConnection.IceServer("stun:stun.l.google.com:19302"));
             return new ArrayList<PeerConnection.IceServer>();
         }
 
