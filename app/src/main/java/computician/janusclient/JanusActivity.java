@@ -54,12 +54,6 @@ public class JanusActivity extends Activity {
     private void init() {
         try {
             EGLContext con = VideoRendererGui.getEGLContext();
-            /*VideoRenderer.Callbacks[] renderers = new VideoRenderer.Callbacks[1];
-            renderers[0] = remoteRender;
-            videoRoomTest = new VideoRoomTest(localRender, renderers);
-            videoRoomTest.initializeMediaContext(this, true, true, true, con);
-            videoRoomTest.Start();
-            */
             echoTest = new EchoTest(localRender, remoteRender);
             echoTest.initializeMediaContext(this, true, true, true, con);
             echoTest.Start();
