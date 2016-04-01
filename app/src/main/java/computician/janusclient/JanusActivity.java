@@ -46,20 +46,21 @@ public class JanusActivity extends Activity {
     private SystemUiHider mSystemUiHider;
 
     private class MyInit implements Runnable {
+
         public void run() {
             init();
         }
-    }
 
-    private void init() {
-        try {
-            EGLContext con = VideoRendererGui.getEGLContext();
-            echoTest = new EchoTest(localRender, remoteRender);
-            echoTest.initializeMediaContext(this, true, true, true, con);
-            echoTest.Start();
+        private void init() {
+            try {
+                EGLContext con = VideoRendererGui.getEGLContext();
+                echoTest = new EchoTest(localRender, remoteRender);
+                echoTest.initializeMediaContext(JanusActivity.this, true, true, true, con);
+                echoTest.Start();
 
-        } catch (Exception ex) {
-            Log.e("computician.janusclient", ex.getMessage());
+            } catch (Exception ex) {
+                Log.e("computician.janusclient", ex.getMessage());
+            }
         }
     }
 
