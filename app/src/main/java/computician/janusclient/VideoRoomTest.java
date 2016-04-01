@@ -12,7 +12,9 @@ import org.webrtc.VideoRenderer;
 import org.webrtc.VideoRendererGui;
 
 import java.math.BigInteger;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
@@ -38,7 +40,7 @@ public class VideoRoomTest {
     private final String JANUS_URI = "ws://192.168.1.197:8188";
     private JanusPluginHandle handle = null;
     private VideoRenderer.Callbacks localRender;
-    private Stack<VideoRenderer.Callbacks> availableRemoteRenderers = new Stack<>();
+    private Deque<VideoRenderer.Callbacks> availableRemoteRenderers = new ArrayDeque<>();
     private HashMap<BigInteger, VideoRenderer.Callbacks> remoteRenderers = new HashMap<>();
     private JanusServer janusServer;
     private BigInteger myid;
@@ -180,89 +182,89 @@ public class VideoRoomTest {
         }
     }
 
-    private void publishOwnFeed() {
-        if(handle != null) {
-            handle.createOffer(new IPluginHandleWebRTCCallbacks() {
-                @Override
-                public void onSuccess(JSONObject obj) {
-                    try
-                    {
-                        JSONObject msg = new JSONObject();
-                        JSONObject body = new JSONObject();
-                        body.put(REQUEST, "configure");
-                        body.put("audio", true);
-                        body.put("video", true);
-                        msg.put(MESSAGE, body);
-                        msg.put("jsep", obj);
-                        handle.sendMessage(new PluginHandleSendMessageCallbacks(msg));
-                    }catch (Exception ex) {
+    public class JanusPublisherPluginCallbacks implements IJanusPluginCallbacks {
+
+        private void publishOwnFeed() {
+            if(handle != null) {
+                handle.createOffer(new IPluginHandleWebRTCCallbacks() {
+                    @Override
+                    public void onSuccess(JSONObject obj) {
+                        try
+                        {
+                            JSONObject msg = new JSONObject();
+                            JSONObject body = new JSONObject();
+                            body.put(REQUEST, "configure");
+                            body.put("audio", true);
+                            body.put("video", true);
+                            msg.put(MESSAGE, body);
+                            msg.put("jsep", obj);
+                            handle.sendMessage(new PluginHandleSendMessageCallbacks(msg));
+                        }catch (Exception ex) {
+
+                        }
+                    }
+
+                    @Override
+                    public JSONObject getJsep() {
+                        return null;
+                    }
+
+                    @Override
+                    public JanusMediaConstraints getMedia() {
+                        JanusMediaConstraints cons = new JanusMediaConstraints();
+                        cons.setRecvAudio(false);
+                        cons.setRecvVideo(false);
+                        cons.setSendAudio(true);
+                        return cons;
+                    }
+
+                    @Override
+                    public Boolean getTrickle() {
+                        return true;
+                    }
+
+                    @Override
+                    public void onCallbackError(String error) {
 
                     }
-                }
-
-                @Override
-                public JSONObject getJsep() {
-                    return null;
-                }
-
-                @Override
-                public JanusMediaConstraints getMedia() {
-                    JanusMediaConstraints cons = new JanusMediaConstraints();
-                    cons.setRecvAudio(false);
-                    cons.setRecvVideo(false);
-                    cons.setSendAudio(true);
-                    return cons;
-                }
-
-                @Override
-                public Boolean getTrickle() {
-                    return true;
-                }
-
-                @Override
-                public void onCallbackError(String error) {
-
-                }
-            });
-        }
-    }
-
-    private void registerUsername() {
-        if(handle != null) {
-            JSONObject obj = new JSONObject();
-            JSONObject msg = new JSONObject();
-            try
-            {
-                obj.put(REQUEST, "join");
-                obj.put("room", roomid);
-                obj.put("ptype", "publisher");
-                obj.put("display", user_name);
-                msg.put(MESSAGE, obj);
+                });
             }
-            catch(Exception ex)
-            {
-
-            }
-            handle.sendMessage(new PluginHandleSendMessageCallbacks(msg));
         }
-    }
 
-    private void newRemoteFeed(BigInteger id) { //todo attach the plugin as a listener
-        VideoRenderer.Callbacks myrenderer;
-        if(!remoteRenderers.containsKey(id))
-        {
-            if(availableRemoteRenderers.empty())
-            {
-                //TODO no more space
-                return;
+        private void registerUsername() {
+            if(handle != null) {
+                JSONObject obj = new JSONObject();
+                JSONObject msg = new JSONObject();
+                try
+                {
+                    obj.put(REQUEST, "join");
+                    obj.put("room", roomid);
+                    obj.put("ptype", "publisher");
+                    obj.put("display", user_name);
+                    msg.put(MESSAGE, obj);
+                }
+                catch(Exception ex)
+                {
+
+                }
+                handle.sendMessage(new PluginHandleSendMessageCallbacks(msg));
             }
-            remoteRenderers.put(id, availableRemoteRenderers.pop());
         }
-        myrenderer = remoteRenderers.get(id);
-        janusServer.Attach(new ListenerAttachCallbacks(id, myrenderer));
-    }
 
-    public class JanusPublisherPluginCallbacks implements IJanusPluginCallbacks {
+        private void newRemoteFeed(BigInteger id) { //todo attach the plugin as a listener
+            VideoRenderer.Callbacks myrenderer;
+            if(!remoteRenderers.containsKey(id))
+            {
+                if(availableRemoteRenderers.isEmpty())
+                {
+                    //TODO no more space
+                    return;
+                }
+                remoteRenderers.put(id, availableRemoteRenderers.pop());
+            }
+            myrenderer = remoteRenderers.get(id);
+            janusServer.Attach(new ListenerAttachCallbacks(id, myrenderer));
+        }
 
         @Override
         public void success(JanusPluginHandle pluginHandle) {

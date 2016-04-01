@@ -152,7 +152,7 @@ public class EchoTest {
 
                     @Override
                     public Boolean getTrickle() {
-                        return null;
+                        return Boolean.FALSE;
                     }
 
                     @Override
